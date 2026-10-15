@@ -1,0 +1,27 @@
+[Unit]
+Description=Maquetas funcionales Vertia y Global Via Publica
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=moai
+Group=moai
+WorkingDirectory=/home/moai/iniciativas-vertia
+EnvironmentFile=/home/moai/iniciativas-vertia/.env
+Environment=PROPOSALS_DIR=/home/moai/iniciativas-vertia/deliverables
+ExecStart=/home/moai/iniciativas-vertia/.venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8788 --workers 1
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/moai/iniciativas-vertia
+MemoryHigh=384M
+MemoryMax=640M
+CPUQuota=75%
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

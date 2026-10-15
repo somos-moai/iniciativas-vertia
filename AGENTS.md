@@ -2,7 +2,7 @@
 
 Proyecto autorizado para dos propuestas comerciales y dos demostraciones funcionales. Leer docs/BRIEF.md y docs/API_CONTRACT.md antes de trabajar. El contexto original está en I:/Unidades compartidas/Vertia/Proyectos Roadmap Vertia. Los requisitos vigentes usan PostgreSQL. Logística queda fuera de esta etapa.
 
-Colaboración real: Gemini implementa frontend; Claude prepara alcance, roadmap y propuestas; Codex implementa backend, integración y despliegue. Leer y actualizar docs/coordination/ con decisiones y resultados. Mantener los cambios dentro de los archivos asignados; no sobrescribir trabajo de otros agentes. No ejecutar git reset, clean ni borrados recursivos. El coordinador realiza commits y push.
+Colaboración vigente: Codex implementó frontend, backend, integración y despliegue; Claude Code elaboró propuestas, alcance y revisión comercial; Gemini mediante Antigravity tiene encargada la revisión independiente de interfaz y procesos, pendiente de ejecución real. Leer y actualizar docs/coordination/ con decisiones y resultados. No atribuir participación por una tarea asignada que no se ha ejecutado. Mantener los cambios dentro de los archivos asignados; no sobrescribir trabajo de otros agentes. No ejecutar git reset, clean ni borrados recursivos. El coordinador realiza commits y push.
 
 Todos los datos de demostración son sintéticos. Direcciones .example. No enviar correos, contratar servicios ni consumir APIs externas reales. Claude, Lusha, Microsoft Graph, OCR y firma deben funcionar como adaptadores simulados explícitos. No publicar secretos, credenciales, transcripciones ni archivos .env. No abrir bases ajenas del VPS ni modificar servicios existentes. El despliegue se coordina con Codex.
 

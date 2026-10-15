@@ -1,0 +1,304 @@
+{
+  "generated_at": "2026-10-15",
+  "currency_note": "weeks son referencia estimada desde accesos y datos confirmados; se revisan al cerrar alcance final con Vertia. included=true es lo cotizado en esta propuesta; included=false es ampliación futura, no vendida ni aceptada en este alcance.",
+  "items": [
+    {
+      "product": "prospectador",
+      "phase": "Fase 1",
+      "id": "prospectador-fase-1-mvp-piloto",
+      "title": "MVP piloto Uruguay (Agustín Silva)",
+      "weeks": "1-6",
+      "included": true,
+      "deliverables": [
+        "Acceso con identidad corporativa y separación de cartera por ejecutivo",
+        "Empresas, agencias y contactos con importación de Excel validada (vista previa, mapeo, reporte de errores)",
+        "Integración con Lusha o un proveedor equivalente aprobado por Vertia: búsqueda, candidatos y revelado controlado por créditos",
+        "Integración de correo y calendario Microsoft 365 para el ejecutivo piloto, sujeta a permisos de TI",
+        "Campañas con secuencias de seguimiento, aprobación humana explícita antes de cada envío",
+        "Detección de respuestas, rebotes y exclusiones con corte automático de seguimientos",
+        "Agentes Claude acotados: priorización, redacción de borradores y clasificación de respuestas, todos con revisión del ejecutivo",
+        "Registro de reuniones, propuestas y métricas mensuales del embudo comercial"
+      ],
+      "acceptance": [
+        "Agustín Silva opera un ciclo completo (importar, buscar, revelar, redactar, aprobar, enviar, dar seguimiento y registrar resultado) sin intervención de MoAI",
+        "Aislamiento de cartera verificado entre dos usuarios de prueba",
+        "Panel de métricas mensual reproducible contra los registros de origen"
+      ],
+      "dependencies": [
+        "Acceso de prueba a Lusha o proveedor equivalente con credenciales de Vertia",
+        "Permisos de Microsoft Graph habilitados por TI de Vertia",
+        "Cuenta o proyecto Claude API con modelo Opus 5.5 habilitado",
+        "Planilla y catálogo de estados comerciales vigentes de Agustín Silva"
+      ]
+    },
+    {
+      "product": "prospectador",
+      "phase": "Fase 2",
+      "id": "prospectador-fase-2-consolidacion",
+      "title": "Consolidación con equipo comercial y configuración regional base",
+      "weeks": "7-10",
+      "included": true,
+      "deliverables": [
+        "Configuración regional base para los cinco países (Argentina, Chile, Perú, México y Uruguay): catálogos, permisos y aislamiento por país y ejecutivo listos para activarse",
+        "Incorporación de un grupo comercial controlado adicional al piloto",
+        "Diseño, mapeo e implementación de una interfaz simple unidireccional hacia POST, condicionado a que exista una API documentada y accesos autorizados; si no existe, intercambio de archivos validado",
+        "Ajustes de reglas de exclusión, límites de envío y catálogo de estados según validación con Agustín Silva y responsables comerciales"
+      ],
+      "acceptance": [
+        "Al menos un ejecutivo adicional al piloto opera con su propia cartera aislada",
+        "Configuración regional base demostrable en al menos un país adicional al piloto, sin desarrollo nuevo de código",
+        "Interfaz simple validada contra API de prueba o intercambio de archivos si no existe API autorizada"
+      ],
+      "dependencies": [
+        "Documentación de API de POST o acuerdo de intercambio de archivos",
+        "Definición de catálogo de estados y reglas del embudo con Agustín Silva",
+        "Decisión de Vertia sobre el grupo comercial a incorporar tras el piloto"
+      ]
+    },
+    {
+      "product": "prospectador",
+      "phase": "Posterior",
+      "id": "prospectador-post-integracion-bidireccional",
+      "title": "Integración bidireccional en vivo con POST",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Sincronización en ambos sentidos de gestiones, estados y resultados comerciales",
+        "Conciliación de conflictos y definición de sistema maestro por campo"
+      ],
+      "acceptance": [
+        "Prueba de conciliación sin duplicar entidades entre prospectador y POST"
+      ],
+      "dependencies": [
+        "prospectador-fase-2-consolidacion",
+        "API de POST documentada, estable y con accesos de producción"
+      ]
+    },
+    {
+      "product": "prospectador",
+      "phase": "Posterior",
+      "id": "prospectador-whatsapp",
+      "title": "Canal WhatsApp vía integración oficial",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Evaluación de proveedor oficial, costos y permisos",
+        "Flujo de mensajería con paso al ejecutivo"
+      ],
+      "acceptance": [
+        "Envío y recepción autorizados por una cuenta oficial de WhatsApp Business"
+      ],
+      "dependencies": [
+        "Cuenta y aprobación de Meta/proveedor oficial a cargo de Vertia"
+      ]
+    },
+    {
+      "product": "prospectador",
+      "phase": "Posterior",
+      "id": "prospectador-linkedin",
+      "title": "Mensajería por LinkedIn",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Evaluación de vías autorizadas de acceso"
+      ],
+      "acceptance": [
+        "Confirmación de acceso API o medio autorizado, no una suscripción personal"
+      ],
+      "dependencies": [
+        "Acuerdo comercial o técnico con LinkedIn a cargo de Vertia"
+      ]
+    },
+    {
+      "product": "prospectador",
+      "phase": "Posterior",
+      "id": "prospectador-despliegue-regional-completo",
+      "title": "Despliegue productivo en los cuatro países restantes",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Validación comercial local, idioma, zona horaria y soporte por país",
+        "Activación productiva de la configuración regional base ya preparada en la Fase 2"
+      ],
+      "acceptance": [
+        "Ejecutivos de cada país operando con cartera y reglas propias validadas localmente"
+      ],
+      "dependencies": [
+        "prospectador-fase-2-consolidacion",
+        "Validación comercial local país por país a cargo de Vertia"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Fase 1",
+      "id": "contratos-fase-1-mvp-documental",
+      "title": "MVP documental: repositorio, ficha y control",
+      "weeks": "1-7",
+      "included": true,
+      "deliverables": [
+        "Repositorio y ficha de contrato con metadata (cliente, contraparte, tipo, país, monto, moneda, vigencia)",
+        "Clasificación por tipo de contrato sobre un catálogo acotado propuesto de hasta 6 tipos (OOH, DOOH, Indoor, Retail Media, acuerdo marco de agencia y concesión)",
+        "Versionamiento de documentos con historial y comparación básica de cambios",
+        "Permisos por país y sociedad, con piloto real en un país y configuración regional base para los otros cuatro",
+        "Registro de auditoría de acciones (lectura sensible, cambios de estado, exportaciones)",
+        "OCR de documentos escaneados para incorporarlos a la búsqueda",
+        "Búsqueda con filtros y texto completo, siempre acotada a los permisos del usuario",
+        "Claude asistivo: resumen ejecutivo y extracción de metadata sugerida, con marca explícita de contenido generado y revisión humana obligatoria",
+        "Repositorio de antecedentes de licitaciones (cartas de experiencia, fichas técnicas, diseños) con su propio control de permisos",
+        "Migración inicial propuesta de hasta 50 contratos vigentes del país piloto, con metadata mínima y marca de origen migrado"
+      ],
+      "acceptance": [
+        "Un contrato cargado, clasificado, versionado y buscable, con permisos verificados entre dos países de prueba",
+        "Una copia saneada generada y revisada por un usuario autorizado antes de compartirse",
+        "Resumen Claude generado y marcado como sugerencia, aceptado o descartado por un usuario"
+      ],
+      "dependencies": [
+        "Catálogo de tipos de contrato y plantillas base confirmado por Vertia",
+        "Reglas de retención y confidencialidad validadas por Legal de Vertia",
+        "Inventario de contratos vigentes a migrar en el país piloto"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Fase 2",
+      "id": "contratos-fase-2-flujo-acotado",
+      "title": "Flujo contractual acotado: solicitud, revisión, firma",
+      "weeks": "8-14",
+      "included": true,
+      "deliverables": [
+        "Solicitud de contrato con datos mínimos y vínculo manual a la oportunidad u origen comercial",
+        "Flujo de revisión y aprobación configurable acotado a los niveles acordados con Vertia, sin motor de reglas dinámico completo",
+        "Acceso entre países con solicitud, aprobación del dueño y vencimiento automático del permiso temporal",
+        "Saneamiento de copia (redacción) con revisión humana obligatoria antes de cualquier entrega",
+        "Alertas de vencimiento configurables con ventanas de aviso (por ejemplo 90, 60, 30, 15 y 7 días)",
+        "Una integración de firma electrónica con un proveedor autorizado y documentado por Vertia"
+      ],
+      "acceptance": [
+        "Un contrato completa el ciclo solicitud, revisión, aprobación y firma con el proveedor habilitado",
+        "Una solicitud de acceso entre países se aprueba, se usa en modo solo lectura y expira según el plazo definido",
+        "Alertas de vencimiento generadas y visibles para el responsable antes de la fecha crítica"
+      ],
+      "dependencies": [
+        "contratos-fase-1-mvp-documental",
+        "Selección y contrato de Vertia con un proveedor de firma electrónica",
+        "Niveles de aprobación y aprobadores por país confirmados por Vertia"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Posterior",
+      "id": "contratos-obligaciones-enmiendas-renovaciones",
+      "title": "Automatización avanzada de obligaciones, enmiendas y renovaciones",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Escalamiento automático y evidencia de obligaciones; el registro básico de responsable, fecha, estado y alerta está incluido en la base",
+        "Enmiendas y renovaciones con flujo automatizado propio, además del registro documental incluido"
+      ],
+      "acceptance": [
+        "Obligación creada, con evidencia cargada y escalamiento verificado ante atraso"
+      ],
+      "dependencies": [
+        "contratos-fase-2-flujo-acotado"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Posterior",
+      "id": "contratos-integraciones-erp-crm-avanzadas",
+      "title": "Integraciones ERP/CRM avanzadas",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Sincronización de cliente fiscal, sociedad y condiciones de pago con el ERP",
+        "Envío de condiciones económicas contractualizadas a facturación"
+      ],
+      "acceptance": [
+        "Conciliación de datos maestros entre CLM y ERP sin discrepancias en una muestra de prueba"
+      ],
+      "dependencies": [
+        "contratos-fase-2-flujo-acotado",
+        "API documentada del ERP y del CRM vigentes de Vertia"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Posterior",
+      "id": "contratos-portal-contraparte-addin-word",
+      "title": "Portal de contraparte y add-in de Word",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Portal externo de colaboración controlada para la contraparte",
+        "Add-in de Word para redlining y aprobación donde trabaja el usuario"
+      ],
+      "acceptance": [
+        "Una contraparte externa carga un documento y recibe notificación sin acceso al resto del repositorio"
+      ],
+      "dependencies": [
+        "contratos-fase-2-flujo-acotado"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Posterior",
+      "id": "contratos-motor-normativo-bi-predictivo",
+      "title": "Motor normativo avanzado, BI predictivo y proveedores de firma adicionales",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Reglas de aprobación dinámicas por monto, país y riesgo",
+        "Analítica predictiva de renovación y cuellos de botella",
+        "Proveedores de firma adicionales por país"
+      ],
+      "acceptance": [
+        "A definir con Vertia al cerrar el alcance de esta etapa"
+      ],
+      "dependencies": [
+        "contratos-fase-2-flujo-acotado"
+      ]
+    },
+    {
+      "product": "contratos",
+      "phase": "Posterior",
+      "id": "contratos-roadmap-regional-completo",
+      "title": "Programa CLM regional completo (referencia 960 horas)",
+      "weeks": null,
+      "included": false,
+      "deliverables": [
+        "Despliegue productivo completo en los cinco países con validación legal local",
+        "Gobierno regional, comité CLM y motor de reglas multipaís completo"
+      ],
+      "acceptance": [
+        "No aplica a esta propuesta; requiere alcance, cotización y decisión build vs. buy independientes"
+      ],
+      "dependencies": [
+        "contratos-fase-2-flujo-acotado",
+        "Decisión de Vertia de continuar el programa regional completo"
+      ]
+    }
+  ],
+  "scope_limits_proposed": {
+    "prospectador": {
+      "executives": 5,
+      "prospect_providers": 1,
+      "m365_tenants": 1,
+      "campaign_sequences": 3,
+      "initial_companies": 5000,
+      "initial_contacts": 10000,
+      "post_interfaces": 1
+    },
+    "contratos": {
+      "pilot_users": 10,
+      "pilot_countries": 1,
+      "regional_country_configuration": 5,
+      "contract_categories": 6,
+      "templates": 5,
+      "approval_levels": 3,
+      "initial_metadata_records": 500,
+      "initial_document_files": 50,
+      "ocr_validation_pages": 100,
+      "signature_providers": 1
+    }
+  }
+}

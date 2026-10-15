@@ -1,0 +1,422 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Propuesta Prospectador comercial · MoAI para Vertia</title><style>
+:root{--ink:#103b58;--accent:#b8ee32;--paper:#f2f5f7;--muted:#61717e}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:#223647;font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.65}.rail{position:fixed;inset:0 auto 0 0;width:260px;padding:35px 28px;background:var(--ink);color:white;overflow:auto}.rail img{max-width:175px;max-height:54px;object-fit:contain;margin:0 0 24px}.rail p{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:#b9cbd6}.rail a{display:block;color:#d4e1e9;text-decoration:none;font-size:13px;margin:0 0 12px}.rail a:hover{color:var(--accent)}main{max-width:1180px;margin-left:260px;padding:58px 65px 80px}.mast{font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:16px}h1{font-size:46px;line-height:1.14;letter-spacing:-1.4px;margin:0 0 22px;color:var(--ink);max-width:760px}h2{font-size:25px;color:var(--ink);margin:0 0 20px;line-height:1.25}h3{font-size:18px;line-height:1.3;color:var(--ink);margin:28px 0 12px}p{margin:0 0 17px}section{background:white;border:1px solid #dce5eb;border-radius:16px;padding:38px;margin:25px 0;scroll-margin-top:24px}section:first-of-type{border-top:4px solid var(--accent)}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0}.summary div{padding:22px;background:var(--ink);color:white;border-radius:12px}.summary span{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#bfd0da}.summary strong{display:block;font-size:25px;letter-spacing:-.5px}.summary small{font-size:12px;color:#cfdae1}.actions{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0 38px}.actions a,.actions button{border:1px solid #cbd8df;background:white;color:var(--ink);padding:10px 16px;border-radius:8px;text-decoration:none;cursor:pointer;font:inherit;font-size:13px}.actions a:first-child{background:var(--ink);color:white}.section-kicker{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}table{border-collapse:collapse;width:100%;font-size:13px;margin:24px 0;display:table}th{background:var(--ink);color:white;text-align:left}td,th{padding:12px;border:1px solid #d9e1e7;vertical-align:top}tr:nth-child(even) td{background:#f5f8fa}ul,ol{padding-left:22px}li{margin:8px 0}a{color:#146c9b}footer{font-size:12px;color:var(--muted);padding-top:20px}blockquote{margin:18px 0;padding:0 0 0 18px;border-left:2px solid #d5dfe4;color:#536b7b}@media(max-width:1000px){.rail{position:static;width:100%;height:auto;padding:20px 25px}.rail nav{display:none}.rail img{margin:0;max-height:35px}.rail p{display:none}main{margin:0;padding:35px 25px}.summary{grid-template-columns:1fr}h1{font-size:34px}section{padding:24px;overflow-x:auto}}@media print{body{background:white;font-size:10.5pt}.rail,.actions{display:none}main{margin:0;padding:0;max-width:none}section{border:0;border-radius:0;padding:0;margin:22px 0;break-inside:auto}.summary{grid-template-columns:repeat(3,1fr)}.summary div{border:1px solid #ddd;background:white;color:#000}.summary span,.summary small{color:#555}h1{font-size:26pt}h2{font-size:16pt;break-after:avoid}h3{break-after:avoid}tr{break-inside:avoid}a{color:inherit;text-decoration:none}@page{size:letter;margin:20mm}}
+:root{--ink:#0a2240;--accent:#ce0e2d}</style><aside class="rail"><img alt="Global Vía Pública" src="data:image/webp;base64,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"><p>MoAI · Propuesta 2026</p><nav><a href="#seccion-1">Resumen ejecutivo</a><a href="#seccion-3">El problema que abordamos</a><a href="#seccion-5">Un día con la solución</a><a href="#seccion-7">Alcance incluido con
+límites propuestos</a><a href="#seccion-9">Condiciones
+propuestas para delimitar la entrega</a><a href="#seccion-11">Fases</a><a href="#seccion-13">Objetivos
+regionales y separación de ampliaciones</a><a href="#seccion-15">Responsabilidades</a><a href="#seccion-17">Prueba de aceptación</a><a href="#seccion-19">Soporte propuesto
+contratado por separado</a><a href="#seccion-21">Garantía</a><a href="#seccion-23">Propiedad licencias y
+cambios de alcance</a><a href="#seccion-25">Vigencia y contacto</a><a href="#seccion-27">Operación y ajustes
+durante el proyecto</a><a href="#seccion-29">Cuadro financiero
+contractual</a></nav></aside><main><div class="mast">MoAI / Vertia Group / 15 de octubre de 2026</div><h1>Prospectador comercial</h1><p>Implementación por etapas, alcance verificable y operación regional.</p><div class="summary"><div><span>Inversión neta</span><strong>311,7235 UF</strong><small>USD 13.000 de referencia</small></div><div><span>Forma de pago</span><strong>40 % + 6 cuotas</strong><small>IVA 19 % adicional</small></div><div><span>Modelo de entrega</span><strong>MVP + consolidación</strong><small>Servicios externos a cargo de Vertia</small></div></div><div class="actions"><a href="prospectador.pdf" download>Descargar propuesta PDF</a><a href="prospectador.docx" download>Versión editable Word</a><button onclick="window.print()">Imprimir</button></div><section><span class="section-kicker">Propuesta comercial independiente</span><p>Preparada para: Vertia Group / Global Vía Pública</p>
+<p>Preparada por: MoAI</p>
+<p>Fecha: 15 de octubre de 2026</p>
+<p>Vigencia: 30 días corridos desde la fecha de emisión</p>
+<p>Contacto: somos@mo-ai.cl</p>
+</section><section id="seccion-1"><span class="section-kicker">01 / Prospectador comercial</span><h2 id="resumen-ejecutivo">Resumen ejecutivo</h2>
+<p>El Prospectador comercial es una aplicación web que acompaña al
+ejecutivo comercial en la parte del proceso que hoy consume tiempo sin
+aportar criterio: encontrar referentes dentro de las empresas objetivo,
+preparar un primer contacto pertinente, dar seguimiento ordenado y
+registrar cada gestión sin volver a cargar la misma información en
+varias herramientas. La reunión, la negociación y el cierre siguen
+siendo del ejecutivo; el sistema le devuelve tiempo y trazabilidad.</p>
+<p>La solución se construye sobre una base ya existente de MoAI, lo que
+reduce el esfuerzo de desarrollo y permite cotizar este alcance en un
+nivel medio. Incluye carteras por ejecutivo con aislamiento de datos,
+gestión de empresas y contactos, importación de las planillas actuales,
+búsqueda y enriquecimiento con un proveedor tipo Lusha autorizado por
+Vertia, integración con Microsoft 365 para correo y calendario, campañas
+de correo con aprobación humana, seguimiento de respuestas, rebotes y
+exclusiones, agentes acotados sobre Claude API y un panel de métricas
+comerciales. La configuración regional base contempla Argentina, Chile,
+Perú, México y Uruguay desde el modelo de datos y los permisos.</p>
+<p>La inversión propuesta es de USD 13.000 netos (UF 311,7235 netas),
+equivalente a UF 370,9510 con IVA incluido. El contrato se expresa y
+cobra en UF; los montos en USD son de referencia. El pago se estructura
+en un anticipo de 40% y seis cuotas mensuales que financian el
+desarrollo, no un servicio recurrente.</p>
+<p>Este documento describe qué está incluido, con límites concretos; qué
+queda para etapas posteriores; y cómo se verifica el resultado. El valor
+no se mide por la cantidad de pantallas, sino por resultados
+verificables: un contacto enriquecido queda disponible sin volver a
+pagarlo, un envío programado respeta exclusiones y permisos antes de
+salir, y una respuesta detiene automáticamente la secuencia de
+seguimiento.</p>
+</section><section id="seccion-3"><span class="section-kicker">02 / Prospectador comercial</span><h2 id="el-problema-que-abordamos">El problema que abordamos</h2>
+<p>Hoy el trabajo de prospección vive repartido entre planillas,
+Outlook, un proveedor de datos y la memoria del ejecutivo. Esa
+dispersión tiene consecuencias medibles: contactos que se vuelven a
+pagar porque nadie recuerda que ya se consultaron, correos de
+seguimiento que salen después de que el prospecto ya respondió, personas
+que pidieron no ser contactadas y reaparecen en una campaña, y métricas
+que se arman a mano al cierre de mes.</p>
+<p>El problema no es la falta de esfuerzo comercial, sino la ausencia de
+un lugar único donde la cartera, el historial y las reglas convivan con
+permisos claros. Cuando cada ejecutivo mantiene su propia versión de la
+verdad, la jefatura no tiene visibilidad consolidada y la organización
+no puede reutilizar información ya adquirida sin exponer la cartera de
+otro ejecutivo.</p>
+</section><section id="seccion-5"><span class="section-kicker">03 / Prospectador comercial</span><h2 id="un-día-con-la-solución">Un día con la solución</h2><img alt="Flujo de trabajo de la solución" style="width:100%;height:auto;margin:12px 0" src="data:image/png;base64,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">
+<p>Un ejecutivo entra con su identidad corporativa de Vertia y ve solo
+su cartera autorizada. Revisa una lista priorizada de contactos
+pendientes, con el motivo de la priorización a la vista. Busca
+referentes en una empresa objetivo a través del proveedor autorizado;
+antes de gastar créditos, el sistema le muestra candidatos y le permite
+elegir cuáles revelar. Si un contacto ya fue enriquecido y sigue
+vigente, no se vuelve a pagar.</p>
+<p>Sobre esa base prepara una campaña. El sistema genera borradores
+adecuados al rubro y a la etapa, sin inventar antecedentes. El ejecutivo
+edita el texto y la firma, revisa la lista final de destinatarios y
+aprueba el envío. La tarea programada vuelve a comprobar, justo antes de
+enviar, que no haya exclusiones, respuestas previas ni límites
+excedidos. Cada envío queda registrado y vinculado a la
+conversación.</p>
+<p>Durante el día llegan respuestas. El sistema las sincroniza desde los
+buzones autorizados, las asocia a la conversación correcta, notifica al
+ejecutivo y detiene el seguimiento automático de esa conversación. Un
+agente sugiere el estado comercial de la respuesta; el ejecutivo lo
+confirma o lo corrige. Las reuniones del calendario se vinculan a los
+contactos. Al cierre de mes, las métricas de gestión ya están
+construidas a partir de los registros, no de una planilla rehecha.</p>
+</section><section id="seccion-7"><span class="section-kicker">04 / Prospectador comercial</span><h2 id="alcance-incluido-con-límites-propuestos">Alcance incluido con
+límites propuestos</h2>
+<p>El alcance siguiente se entrega como producto funcional. Donde
+corresponde se proponen límites concretos, que se incorporan como
+condiciones de la propuesta y no como aceptaciones ya existentes.</p>
+<h3 id="identidad-roles-y-cartera">Identidad roles y cartera</h3>
+<p>Inicio de sesión con identidad corporativa de Vertia mediante
+Microsoft Entra ID. Separación de contactos, historial y gestión por
+ejecutivo, validada en el servidor. Roles de referencia: ejecutivo,
+jefatura, administrador funcional y soporte. El alcance exacto de
+jefatura y administración se acuerda en el levantamiento; no se asume
+acceso irrestricto a todas las carteras.</p>
+<h3 id="empresas-contactos-e-historial">Empresas contactos e
+historial</h3>
+<p>Mantención de empresas y contactos con sus relaciones (agencia y
+anunciante diferenciados), historial cronológico de correos, respuestas,
+rebotes, reuniones y cambios de estado. Importación de las planillas
+actuales con vista previa, mapeo, validación y reporte de errores;
+repetir una importación no duplica registros válidos. Detección de
+duplicados por identificador de proveedor, email normalizado y
+empresa.</p>
+<h3 id="búsqueda-y-enriquecimiento">Búsqueda y enriquecimiento</h3>
+<p>Integración con un proveedor de datos tipo Lusha, mediante su API
+oficial y con credenciales de Vertia. Límite propuesto: un proveedor en
+esta entrega. Conectar proveedores adicionales requiere alcance y
+credenciales aparte. El consumo de créditos queda registrado por usuario
+y operación, con cupos configurables. La reutilización de datos vigentes
+evita el gasto repetido.</p>
+<h3 id="campañas-y-correo-corporativo">Campañas y correo
+corporativo</h3>
+<p>Creación de campañas con destinatarios revisables, borradores
+asistidos, secuencias de seguimiento y aprobación humana explícita para
+cada envío individual o en lote. Integración con Microsoft 365 (Graph)
+para enviar desde la identidad autorizada del ejecutivo y para leer
+calendario, sujeta a los permisos que habilite TI de Vertia. Cola de
+envíos con identificador único para evitar duplicados ante reintentos.
+Límites configurables por buzón, campaña y horario.</p>
+<h3 id="respuestas-exclusiones-y-seguimiento">Respuestas exclusiones y
+seguimiento</h3>
+<p>Sincronización de respuestas y rebotes, vinculación a la conversación
+correcta, detención del seguimiento ante una respuesta, y registro de
+solicitudes de no contacto que excluyen a la persona de futuras
+campañas. Clasificación asistida del estado comercial, con confirmación
+del ejecutivo.</p>
+<h3 id="métricas-comerciales">Métricas comerciales</h3>
+<p>Panel de gestión mensual (actividad, correos, reuniones, respuestas,
+propuestas) acotado al alcance autorizado del usuario, con ganados,
+perdidos y pendientes, y definición explícita de período y denominador.
+No se incluye seguimiento de apertura por píxel, atribución de ventas ni
+garantía de entrega.</p>
+<h3 id="agentes-sobre-claude-api">Agentes sobre Claude API</h3>
+<p>Responsabilidades acotadas y trazables: priorización asistida,
+redacción de borradores, clasificación de respuestas y resumen
+comercial. Todas con control humano. El agente no negocia precios ni
+cierra ventas. Los permisos del usuario se aplican a toda recuperación
+de datos.</p>
+</section><section id="seccion-9"><span class="section-kicker">05 / Prospectador comercial</span><h2 id="condiciones-propuestas-para-delimitar-la-entrega">Condiciones
+propuestas para delimitar la entrega</h2>
+<p>El piloto y la consolidación incluidos contemplan hasta cinco
+ejecutivos, un tenant corporativo Microsoft 365, un proveedor de
+prospectos, tres secuencias de campaña configurables y una interfaz
+simple de intercambio con POST. Si existe una API documentada y
+autorizada, la interfaz incluye un flujo unidireccional de envío o
+actualización de gestiones con validación y registro de errores; no
+incluye sincronización bidireccional de todos los datos. Si la API no
+está disponible, se implementa importación y exportación de archivos
+validados y cualquier conector posterior se cotiza por separado.</p>
+<p>La carga inicial propuesta contempla hasta 5.000 empresas y 10.000
+contactos desde un formato de planilla acordado, con deduplicación y
+reporte de errores. Son límites de la migración y del acompañamiento
+inicial, no una licencia por registro ni un límite permanente de
+almacenamiento. Si la muestra requiere limpieza manual o cruce con
+fuentes adicionales se informa el diferencial antes de ejecutarlo.</p>
+<p>Fase MVP de referencia: semanas 1 a 6. Consolidación, aceptación y
+publicación: semanas 7 a 10. Se configura el modelo para los cinco
+países; el piloto productivo es Uruguay. El despliegue masivo y la
+validación local del resto de los países forman parte de la ampliación
+regional, sin reconstruir el núcleo.</p>
+</section><section id="seccion-11"><span class="section-kicker">06 / Prospectador comercial</span><h2 id="fases">Fases</h2>
+<h3 id="fase-1-mvp-con-agus-en-uruguay">Fase 1 MVP con Agus en
+Uruguay</h3>
+<p>Puesta en marcha del núcleo en infraestructura de Vertia, con Agustín
+Silva como usuario referente: cartera aislada, importación de datos
+reales, enriquecimiento con un proveedor, campañas con aprobación,
+seguimiento y métricas base. El objetivo es operar el ciclo completo con
+datos reales de un ejecutivo.</p>
+<h3 id="fase-2-consolidación-con-el-equipo">Fase 2 Consolidación con el
+equipo</h3>
+<p>Extensión a un grupo comercial controlado, ajuste de roles de
+jefatura, refinamiento de métricas y estabilización operativa. Se
+incluye además el diseño y mapeo de la consolidación hacia POST y una
+interfaz simple de intercambio sobre una API documentada y autorizada.
+Si no existe una API validada, el alcance incluido es un intercambio de
+archivos validado (importación/exportación), y el conector específico se
+estima por separado.</p>
+<p>Plazo de referencia: 8 a 10 semanas desde la entrega de accesos y
+datos, revisable según el alcance final.</p>
+</section><section id="seccion-13"><span class="section-kicker">07 / Prospectador comercial</span><h2 id="objetivos-regionales-y-separación-de-ampliaciones">Objetivos
+regionales y separación de ampliaciones</h2>
+<p>La solución nace pensada para cinco países (Argentina, Chile, Perú,
+México y Uruguay) desde el modelo de datos, los permisos y la
+configuración regional base. El piloto opera en Uruguay y el despliegue
+a otros países se realiza por configuración. La validación de reglas
+locales corresponde a Vertia.</p>
+<p>Quedan explícitamente fuera de esta propuesta, como roadmap separado:
+mensajería por WhatsApp y LinkedIn, conectores a proveedores de datos
+adicionales, automatizaciones de otras áreas y la conexión bidireccional
+completa con POST más allá del diseño, mapeo e interfaz simple
+descritos.</p>
+<h3 id="matriz-de-alcance">Matriz de alcance</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capacidad</th>
+<th>Incluido</th>
+<th>Futuro (ampliación)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Carteras por ejecutivo, empresas, contactos, historial</td>
+<td>Sí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Importación de planillas con validación</td>
+<td>Sí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Enriquecimiento con un proveedor autorizado</td>
+<td>Sí</td>
+<td>Proveedores adicionales</td>
+</tr>
+<tr>
+<td>Microsoft 365 correo y calendario</td>
+<td>Sí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Campañas con aprobación humana y seguimiento</td>
+<td>Sí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Agentes acotados sobre Claude API</td>
+<td>Sí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Configuración regional base 5 países</td>
+<td>Sí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Consolidación POST: diseño, mapeo e interfaz simple</td>
+<td>Sí</td>
+<td>Conector bidireccional completo</td>
+</tr>
+<tr>
+<td>WhatsApp / LinkedIn</td>
+<td>—</td>
+<td>Sí</td>
+</tr>
+</tbody>
+</table>
+<p>Lo que se muestre en la demostración sobre capacidades futuras está
+rotulado como demostración y no constituye producto final ni alcance
+contratado.</p>
+</section><section id="seccion-15"><span class="section-kicker">08 / Prospectador comercial</span><h2 id="responsabilidades">Responsabilidades</h2>
+<h3 id="vertia">Vertia</h3>
+<p>Provee la infraestructura (AWS), PostgreSQL, las credenciales y
+cuentas de los servicios de terceros (proveedor de datos tipo Lusha,
+Microsoft 365, Claude API con Opus 5.5 como mínimo), los permisos de TI
+para Graph, los datos a importar, la validación de reglas regionales y
+la disponibilidad de los usuarios referentes. Los cargos de estos
+terceros los habilita y paga directamente Vertia y no forman parte de
+los honorarios de MoAI.</p>
+<h3 id="moai">MoAI</h3>
+<p>Diseña, desarrolla, prueba, documenta y publica de forma controlada
+la solución dentro del alcance acordado; capacita al usuario referente y
+entrega el soporte contratado por separado.</p>
+</section><section id="seccion-17"><span class="section-kicker">09 / Prospectador comercial</span><h2 id="prueba-de-aceptación">Prueba de aceptación</h2>
+<p>La entrega se considera aceptada cuando, con datos reales de la
+cartera de referencia, se verifica el ciclo completo: importar sin
+duplicar, enriquecer un contacto y reutilizarlo sin volver a pagarlo,
+crear y aprobar una campaña, comprobar que un envío programado respeta
+exclusiones y permisos antes de salir, recibir una respuesta que detiene
+el seguimiento y verla reflejada en las métricas del período. Cada punto
+se demuestra sobre comportamiento verificable, no sobre la sola
+presencia de una pantalla.</p>
+</section><section id="seccion-19"><span class="section-kicker">10 / Prospectador comercial</span><h2 id="soporte-propuesto-contratado-por-separado">Soporte propuesto
+contratado por separado</h2>
+<p>Soporte mensual de 8 horas, de referencia USD 326,99 netos (UF
+7,8408) al mes, convertido a UF en el presupuesto y cobrado desde la
+puesta en producción. Horario L a V de 09:00 a 18:00 hora de Chile,
+salvo festivos. Primera respuesta para incidencias críticas en 4 horas
+hábiles y para el resto en 1 día hábil; la resolución depende del
+diagnóstico. Las mejoras y funciones nuevas se gestionan por control de
+cambios y no se descuentan de las horas de soporte.</p>
+</section><section id="seccion-21"><span class="section-kicker">11 / Prospectador comercial</span><h2 id="garantía">Garantía</h2>
+<p>Se incluye una garantía de 60 días corridos desde la aceptación, por
+defectos atribuibles al desarrollo dentro del alcance entregado. La
+garantía no consume horas de soporte.</p>
+</section><section id="seccion-23"><span class="section-kicker">12 / Prospectador comercial</span><h2 id="propiedad-licencias-y-cambios-de-alcance">Propiedad licencias y
+cambios de alcance</h2>
+<p>El entregable desarrollado específicamente para Vertia queda a su
+disposición según los términos del contrato. Los componentes base y
+herramientas preexistentes de MoAI se licencian para su uso en esta
+solución. Las licencias y cuentas de terceros son contratadas y pagadas
+por Vertia a su nombre. Todo cambio de alcance se acuerda por escrito
+mediante control de cambios, con su efecto en plazo e inversión.</p>
+</section><section id="seccion-25"><span class="section-kicker">13 / Prospectador comercial</span><h2 id="vigencia-y-contacto">Vigencia y contacto</h2>
+<p>Esta propuesta tiene una vigencia de 30 días corridos desde su
+emisión. Para dudas, ajustes o aceptación: somos@mo-ai.cl.</p>
+</section><section id="seccion-27"><span class="section-kicker">14 / Prospectador comercial</span><h2 id="operación-y-ajustes-durante-el-proyecto">Operación y ajustes
+durante el proyecto</h2>
+<p>Los servicios de terceros los contrata y paga Vertia durante
+desarrollo, pruebas, aceptación y producción. El detalle de AWS,
+PostgreSQL, Claude Opus 5.5, OCR, prospectos y firma se entrega como
+anexo de requerimientos a cargo del cliente. No se incluyen sus cargos
+dentro de los honorarios MoAI.</p>
+<p>Se incorporan como anexos el protocolo de mantención y soporte y la
+matriz de roadmap. Toda publicación requiere pruebas, aceptación y una
+opción de recuperación. Los defectos del alcance aceptado se cubren por
+garantía; las mejoras se evalúan antes de ejecutarse. Una sustitución de
+esfuerzo equivalente puede acordarse por escrito antes de iniciar el
+trabajo. Si aumenta el esfuerzo, se comunica el diferencial de horas,
+precio y plazo para su aprobación previa.</p>
+</section><section id="seccion-29"><span class="section-kicker">15 / Prospectador comercial</span><h2 id="cuadro-financiero-contractual">Cuadro financiero
+contractual</h2>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th style="text-align: right;">USD de referencia</th>
+<th style="text-align: right;">UF de contratación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Honorarios netos</td>
+<td style="text-align: right;">13.000,00</td>
+<td style="text-align: right;">311,7235</td>
+</tr>
+<tr>
+<td>IVA del 19 %</td>
+<td style="text-align: right;">2.470,00</td>
+<td style="text-align: right;">59,2275</td>
+</tr>
+<tr>
+<td>Total con IVA</td>
+<td style="text-align: right;">15.470,00</td>
+<td style="text-align: right;">370,9510</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Pago</th>
+<th style="text-align: right;">Día propuesto</th>
+<th style="text-align: right;">Neto UF</th>
+<th style="text-align: right;">IVA UF referencial</th>
+<th style="text-align: right;">Total UF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anticipo al inicio</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">124,6894</td>
+<td style="text-align: right;">23,6910</td>
+<td style="text-align: right;">148,3804</td>
+</tr>
+<tr>
+<td>Cuota mensual 1</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">31,1724</td>
+<td style="text-align: right;">5,9228</td>
+<td style="text-align: right;">37,0952</td>
+</tr>
+<tr>
+<td>Cuota mensual 2</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">31,1724</td>
+<td style="text-align: right;">5,9228</td>
+<td style="text-align: right;">37,0952</td>
+</tr>
+<tr>
+<td>Cuota mensual 3</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">31,1724</td>
+<td style="text-align: right;">5,9228</td>
+<td style="text-align: right;">37,0952</td>
+</tr>
+<tr>
+<td>Cuota mensual 4</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">31,1724</td>
+<td style="text-align: right;">5,9228</td>
+<td style="text-align: right;">37,0952</td>
+</tr>
+<tr>
+<td>Cuota mensual 5</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">31,1724</td>
+<td style="text-align: right;">5,9228</td>
+<td style="text-align: right;">37,0952</td>
+</tr>
+<tr>
+<td>Cuota mensual 6</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">31,1721</td>
+<td style="text-align: right;">5,9225</td>
+<td style="text-align: right;">37,0946</td>
+</tr>
+</tbody>
+</table>
+<p>Las seis cuotas mensuales financian el desarrollo. El anticipo
+corresponde al 40 % y el saldo al 60 %. La última cuota concilia el
+redondeo de cuatro decimales. Los días 30 a 180 desde el inicio son una
+condición de calendario propuesta; las fechas se fijan en la orden de
+compra.</p>
+<p>La UF queda fijada como unidad contractual al emitir esta propuesta.
+El USD se muestra únicamente como referencia de origen; no se aplica un
+segundo reajuste por dólar. La factura se emite en CLP según la UF del
+vencimiento acordado, calculando el IVA sobre la base en CLP. Los
+importes de IVA en UF son referenciales.</p>
+<p>Referencias consultadas el 15 de octubre de 2026: UF CLP 41.162,73 y
+dólar observado CLP 987,03. <a
+href="https://si3.bcentral.cl/indicadoressiete/secure/IndicadoresDiarios.aspx?Idioma=es-CL">Banco
+Central de Chile</a>, <a
+href="https://www.sii.cl/valores_y_fechas/uf/uf2026.htm">UF SII</a> e <a
+href="https://www.sii.cl/preguntas_frecuentes/impuestos_mensuales/001_130_0572.htm">IVA
+SII</a>. Vigencia comercial propuesta de 30 días.</p>
+</section><footer>MoAI · somos@mo-ai.cl · Documento de propuesta, sujeto a formalización de las condiciones comerciales.</footer></main></html>

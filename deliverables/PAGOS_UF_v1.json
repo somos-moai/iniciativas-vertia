@@ -1,0 +1,203 @@
+{
+  "reference": {
+    "date": "2026-10-15",
+    "timezone": "America/Santiago",
+    "usd_clp": 987.03,
+    "uf_clp": 41162.73,
+    "vat_rate": 0.19,
+    "source": "https://si3.bcentral.cl/indicadoressiete/secure/IndicadoresDiarios.aspx?Idioma=es-CL",
+    "uf_source": "https://www.sii.cl/valores_y_fechas/uf/uf2026.htm",
+    "usd_note": "Dólar observado del panel Banco Central consultado el 15-10-2026; tabla SII dólar consultada no mostraba aún 15 octubre."
+  },
+  "currency_contract": "UF",
+  "usd_reference_only": true,
+  "rounding": "UF 4 decimales; última cuota ajusta redondeo. IVA UF referencial; factura en CLP calcula IVA sobre base CLP.",
+  "projects": [
+    {
+      "id": "prospectador",
+      "usd_net": 13000,
+      "usd_vat": 2470,
+      "usd_gross": 15470,
+      "uf_net": 311.7235,
+      "uf_vat": 59.2275,
+      "uf_gross": 370.951,
+      "support": {
+        "usd_month": 326.99,
+        "uf_month": 7.8408,
+        "hours_month": 8
+      },
+      "payments": [
+        {
+          "id": 0,
+          "description": "Anticipo al inicio",
+          "due_day": 0,
+          "usd_net": 5200,
+          "usd_vat": 988,
+          "uf_net": 124.6894,
+          "uf_vat": 23.691,
+          "uf_gross": 148.3804,
+          "usd_gross": 6188
+        },
+        {
+          "id": 1,
+          "description": "Cuota mensual 1",
+          "due_day": 30,
+          "usd_net": 1300,
+          "usd_vat": 247,
+          "uf_net": 31.1724,
+          "uf_vat": 5.9228,
+          "uf_gross": 37.0952,
+          "usd_gross": 1547
+        },
+        {
+          "id": 2,
+          "description": "Cuota mensual 2",
+          "due_day": 60,
+          "usd_net": 1300,
+          "usd_vat": 247,
+          "uf_net": 31.1724,
+          "uf_vat": 5.9228,
+          "uf_gross": 37.0952,
+          "usd_gross": 1547
+        },
+        {
+          "id": 3,
+          "description": "Cuota mensual 3",
+          "due_day": 90,
+          "usd_net": 1300,
+          "usd_vat": 247,
+          "uf_net": 31.1724,
+          "uf_vat": 5.9228,
+          "uf_gross": 37.0952,
+          "usd_gross": 1547
+        },
+        {
+          "id": 4,
+          "description": "Cuota mensual 4",
+          "due_day": 120,
+          "usd_net": 1300,
+          "usd_vat": 247,
+          "uf_net": 31.1724,
+          "uf_vat": 5.9228,
+          "uf_gross": 37.0952,
+          "usd_gross": 1547
+        },
+        {
+          "id": 5,
+          "description": "Cuota mensual 5",
+          "due_day": 150,
+          "usd_net": 1300,
+          "usd_vat": 247,
+          "uf_net": 31.1724,
+          "uf_vat": 5.9228,
+          "uf_gross": 37.0952,
+          "usd_gross": 1547
+        },
+        {
+          "id": 6,
+          "description": "Cuota mensual 6",
+          "due_day": 180,
+          "usd_net": 1300,
+          "usd_vat": 247,
+          "uf_net": 31.1721,
+          "uf_vat": 5.9225,
+          "uf_gross": 37.0946,
+          "usd_gross": 1547
+        }
+      ]
+    },
+    {
+      "id": "contratos",
+      "usd_net": 30000,
+      "usd_vat": 5700,
+      "usd_gross": 35700,
+      "uf_net": 719.3619,
+      "uf_vat": 136.6788,
+      "uf_gross": 856.0407,
+      "support": {
+        "usd_month": 490.49,
+        "uf_month": 11.7613,
+        "hours_month": 12
+      },
+      "payments": [
+        {
+          "id": 0,
+          "description": "Anticipo al inicio",
+          "due_day": 0,
+          "usd_net": 12000,
+          "usd_vat": 2280,
+          "uf_net": 287.7448,
+          "uf_vat": 54.6715,
+          "uf_gross": 342.4163,
+          "usd_gross": 14280
+        },
+        {
+          "id": 1,
+          "description": "Cuota mensual 1",
+          "due_day": 30,
+          "usd_net": 3000,
+          "usd_vat": 570,
+          "uf_net": 71.9362,
+          "uf_vat": 13.6679,
+          "uf_gross": 85.6041,
+          "usd_gross": 3570
+        },
+        {
+          "id": 2,
+          "description": "Cuota mensual 2",
+          "due_day": 60,
+          "usd_net": 3000,
+          "usd_vat": 570,
+          "uf_net": 71.9362,
+          "uf_vat": 13.6679,
+          "uf_gross": 85.6041,
+          "usd_gross": 3570
+        },
+        {
+          "id": 3,
+          "description": "Cuota mensual 3",
+          "due_day": 90,
+          "usd_net": 3000,
+          "usd_vat": 570,
+          "uf_net": 71.9362,
+          "uf_vat": 13.6679,
+          "uf_gross": 85.6041,
+          "usd_gross": 3570
+        },
+        {
+          "id": 4,
+          "description": "Cuota mensual 4",
+          "due_day": 120,
+          "usd_net": 3000,
+          "usd_vat": 570,
+          "uf_net": 71.9362,
+          "uf_vat": 13.6679,
+          "uf_gross": 85.6041,
+          "usd_gross": 3570
+        },
+        {
+          "id": 5,
+          "description": "Cuota mensual 5",
+          "due_day": 150,
+          "usd_net": 3000,
+          "usd_vat": 570,
+          "uf_net": 71.9362,
+          "uf_vat": 13.6679,
+          "uf_gross": 85.6041,
+          "usd_gross": 3570
+        },
+        {
+          "id": 6,
+          "description": "Cuota mensual 6",
+          "due_day": 180,
+          "usd_net": 3000,
+          "usd_vat": 570,
+          "uf_net": 71.9361,
+          "uf_vat": 13.6678,
+          "uf_gross": 85.6039,
+          "usd_gross": 3570
+        }
+      ]
+    }
+  ]
+}

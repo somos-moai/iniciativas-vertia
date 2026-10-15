@@ -9,5 +9,9 @@ __pycache__/
 *.log
 tmp/
 artifacts/qa/
+scripts/provider_review.py
+scripts/stop_duplicate_draft.py
+scripts/stop_duplicate_draft.ps1
+docs/coordination/claude-provider-output.json
 *.zip
 
