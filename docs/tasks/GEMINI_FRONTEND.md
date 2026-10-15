@@ -1,0 +1,16 @@
+# Gemini — interfaz de las dos soluciones
+
+Implementa frontend/ completo con React/Vite y CSS propio. Lee BRIEF y API_CONTRACT y docs/coordination/codex-backend.md si existe. Otro agente implementa backend/ y no debes tocarlo. No ejecutar git commits/push. Usa logos en public/brand, fuentes locales o Google Fonts con fallback. package.json, index.html y src/ completos. Codex hará npm install y build.
+
+Objetivo: dos aplicaciones SaaS empresariales visualmente cuidadas, no una landing. Hub de entrada en / para elegir soluciones y ver propuestas/enlaces /propuestas/. Rutas /prospectador y /contratos con navegación lateral real, header con país, buscador, perfil demo y marca oficial. Claro, amplio, tipografía legible (Inter/Manrope), tablas refinadas, chips de estados, tarjetas métricas con minigráficos SVG, vacíos y errores tratados, drawer o modal útil. Debe funcionar a1440px y390px.
+
+Prospectador: Resumen (embudo real, actividad, cartera y objetivos), Mi cartera (tabla+ficha+crear), Descubrir (buscar candidatos, revelar y ver créditos), Campañas (crear con contactos, generar borrador, editar si soporta API, aprobar, simular envío), Seguimiento (respuestas, excluir, agendar reunión), Propuestas y resultados (registrar oportunidad), Integraciones, Roadmap. Ficha debe mostrar cronología y acciones. Colores Global #0A2240/#CE0E2D con superficies blancas. No botóndecorativo.
+
+Contratos: Resumen (vencimientos, aprobaciones, distribución países), Repositorio (buscador, filtros, crear, ficha completa), Mi trabajo (revisar/aprobar/rechazar), Accesos (pedir/otorgar), Obligaciones (crear ycompletar), Antecedentes (cartas/fichas), Auditoría, Integraciones y Roadmap. Ficha con tabs Resumen/Documentos/Proceso/Obligaciones/Historial; puede cargar documento demo, analizar, ver fuente/resumen, generar copia saneada yabrir endpointdocumento, pasar estados (review/aprobación/firma/activo), añadirenmienda/renovar. Vertia azul #103B58, azulmarca #1178B6, lima#CCFF00 como acento medido. Logo blanco exige fondomarino.
+
+Integrar fetch real con base /api. Estado GET /api/state?app=... y X-Demo-User; ids de perfiles: regional, manager-cl, executive-uy, legal-pe, viewer-ar, executive-cl. Perfil inicialregional; cambiarperfilrefetch. POSTactions segúncontrato. Tras éxito refrescar estado y toast. Mostrar loading y error con reintento, nada de silencios. Puede incluir fixture dedicado solo cuando VITE_DEMO_OFFLINE=true; predeterminado API real. No state ficticio como sustituto permanente del backend. CTA export debe descargar /api/export mediante fetchcon cabecera.
+
+Todaslaspantallas indican discretamente «Demostración · datos sintéticos». Adaptadoresexternos «Simulado»; sincredenciales ysinenvíosreales. Mostrar regladepermisos cuandoacción403 y no exponerdatosbloqueados. Enlace propuesta comercial /propuestas/prospectador/ y /propuestas/contratos/. Interfaces fuera de scope posterior identificadas enroadmap, no inventar endpointspagados.
+
+Prioriza implementar end-to-end todos los flujos importantes y luego pulir diseño. Crea docs/coordination/gemini.md con archivos, decisiones, tests y pendientes. Mantén espacios normales en todos los textos. La ejecución no requiere comandos si no están permitidos; escribe archivos y deja construcción aCodex.
+
