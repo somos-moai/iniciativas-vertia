@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),os=require('os'),{spawn}=require('child_process');
+const local=path.join(os.tmpdir(),'vertia-presentation-preview'),deps=path.join(os.tmpdir(),'vertia-frontend-codex','node_modules');
+fs.mkdirSync(path.join(local,'src'),{recursive:true});
+for(const file of ['PresentationHub.jsx','presentation.css','styles.css'])fs.copyFileSync(path.join(__dirname,'src',file),path.join(local,'src',file));
+fs.cpSync(path.join(__dirname,'public'),path.join(local,'public'),{recursive:true});
+fs.copyFileSync(path.join(__dirname,'package.json'),path.join(local,'package.json'));
+if(!fs.existsSync(path.join(local,'node_modules')))fs.symlinkSync(deps,path.join(local,'node_modules'),'junction');
+fs.writeFileSync(path.join(local,'index.html'),'<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><div id="root"></div><script type="module" src="/src/entry.jsx"></script></html>');
+fs.writeFileSync(path.join(local,'src','entry.jsx'),"import React from 'react';import{createRoot}from'react-dom/client';import './styles.css';import{PresentationHub}from './PresentationHub.jsx';createRoot(document.getElementById('root')).render(<PresentationHub/>);");
+const child=spawn(process.execPath,[path.join(deps,'vite','bin','vite.js'),'--host','127.0.0.1','--port','5179'],{cwd:local,stdio:'inherit'});
+process.on('SIGINT',()=>child.kill());child.on('exit',code=>process.exit(code||0));

@@ -21,6 +21,21 @@ class Meta(Base):
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[dict] = mapped_column(JSONB)
 
+class DocumentUpload(Base):
+    __tablename__ = "vertia_document_uploads"
+    id: Mapped[str] = mapped_column(String(96), primary_key=True)
+    contract_id: Mapped[str] = mapped_column(String(96), index=True)
+    filename: Mapped[str] = mapped_column(String(240))
+    content_type: Mapped[str] = mapped_column(String(64))
+    storage_key: Mapped[str] = mapped_column(String(64), unique=True)
+    sha256: Mapped[str] = mapped_column(String(64))
+    size_bytes: Mapped[int]
+    version: Mapped[int]
+    status: Mapped[str] = mapped_column(String(32))
+    extraction: Mapped[dict] = mapped_column(JSONB)
+    uploaded_by: Mapped[str] = mapped_column(String(96))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 def database_url():
     url = os.environ.get("DATABASE_URL", "")
     if not url.startswith(("postgresql://", "postgresql+psycopg://")):

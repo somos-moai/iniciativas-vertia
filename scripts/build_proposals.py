@@ -29,7 +29,6 @@ def source_md(project):
     source=path.read_text(encoding='utf-8-sig')
     # The canonical ledger replaces the draft tables, avoiding duplicated pricing.
     source=re.sub(r'\n## (?:Inversión|Calendario de pagos)[^\n]*\n.*?(?=\n## |\Z)','\n',source,flags=re.S)
-    source=re.sub(r'^(#{1,6}) (.+)$',lambda m:m[1]+' '+re.sub(r'[^\w\s]',' ',m[2]).strip(),source,flags=re.M)
     # Canonical appendix, generated from the reconciled payment ledger.
     source += '\n\n## Cuadro financiero contractual\n\n'
     source += '| Concepto | USD de referencia | UF de contratación |\n|---|---:|---:|\n'

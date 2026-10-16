@@ -1,0 +1,66 @@
+/* Movimiento y estados según MOTION_GUIDE (secciones 4, 7 y 8).
+   Tokens únicos: no usar curvas ni duraciones sueltas en otros archivos. */
+:root{
+  --ease-enter:cubic-bezier(.16,1,.3,1);
+  --ease-premium:cubic-bezier(.22,1,.36,1);
+  --ease-move:cubic-bezier(.76,0,.24,1);
+  --ease-exit:cubic-bezier(.7,0,.84,0);
+  --ease-pop:cubic-bezier(.34,1.56,.64,1);
+  --ease-spring:cubic-bezier(.34,1.25,.64,1); /* resorte suave, rebote ~zeta 0.8 */
+  --ms-press:100ms;
+  --ms-feedback:150ms;
+  --ms-move:400ms;
+  --ms-hero:750ms;
+  --ms-exit:240ms;
+}
+
+/* 1. Feedback de clic: escala 0.97 en 100 ms y vuelta con resorte. Solo transform; el color no rebota. */
+.btn,.fx-tabs button,.fx-go,.side-nav button,.fx-chip-link{transition:background-color var(--ms-feedback) var(--ease-premium),color var(--ms-feedback) var(--ease-premium),border-color var(--ms-feedback) var(--ease-premium),transform 260ms var(--ease-spring)}
+.btn:active:not(:disabled),.fx-tabs button:active,.fx-go:active,.side-nav button:active,.fx-chip-link:active{transform:scale(.97);transition-duration:var(--ms-feedback),var(--ms-feedback),var(--ms-feedback),var(--ms-press);transition-timing-function:var(--ease-premium),var(--ease-premium),var(--ease-premium),var(--ease-exit)}
+.btn:focus-visible,.fx-tabs button:focus-visible,.fx-go:focus-visible,.side-nav button:focus-visible{outline:2px solid #1f6fb2;outline-offset:2px}
+
+/* 2. Carga: skeleton con brillo lineal lento, sin spinners. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.page-skeleton{display:flex;flex-direction:column;gap:14px;padding-top:4px}
+.sk{border-radius:8px;background:#e9eef2 linear-gradient(90deg,#e9eef2 0%,#f5f8fa 45%,#e9eef2 90%) 0 0/300% 100%;animation:sk-shimmer 1.8s linear infinite}
+.sk-eyebrow{width:160px;height:12px}
+.sk-title{width:min(460px,80%);height:30px}
+.sk-text{width:min(620px,95%);height:16px;margin-bottom:12px}
+.sk-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.sk-metric{height:128px;border-radius:10px}
+.sk-panels{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-top:4px}
+.sk-panel{height:300px;border-radius:10px}
+@keyframes sk-shimmer{from{background-position:100% 0}to{background-position:-50% 0}}
+@media(max-width:760px){.sk-metrics{grid-template-columns:1fr 1fr}.sk-panels{grid-template-columns:1fr}.sk-panel{height:200px}}
+
+.busy-indicator{gap:10px;color:#3c5468}
+.busy-line{position:relative;width:46px;height:3px;border-radius:3px;background:#e3eaf0;overflow:hidden}
+.busy-line::after{content:'';position:absolute;inset:0 auto 0 0;width:40%;border-radius:3px;background:var(--navy);animation:busy-slide 1.1s linear infinite}
+@keyframes busy-slide{from{transform:translateX(-100%)}to{transform:translateX(260%)}}
+
+/* 3. País como código en texto, no emoji. */
+.country-code{display:inline-flex;align-items:center;justify-content:center;min-width:28px;font-size:11.5px!important;font-weight:700;letter-spacing:.5px;line-height:1;padding:3px 5px;border-radius:4px;background:#eef2f6;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* Descubrir prospectos: pasos del proceso en lugar del orbital decorativo. */
+.discover-steps{list-style:none;margin:0 10px 0 24px;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:dstep;min-width:280px}
+.discover-steps li{display:flex;align-items:center;gap:12px;color:#d7e1ea;font-size:15px;line-height:1.35}
+.discover-steps li svg{flex:none;width:36px;height:36px;padding:8px;border-radius:8px;background:#ffffff14;color:#fff}
+.discover-steps li:last-child svg{background:var(--accent)}
+@media(max-width:960px){.discover-banner{flex-direction:column;align-items:flex-start;gap:20px}.discover-steps{margin:0;min-width:0;width:100%}}
+
+/* 4. Momento coreografiado (uno por app): envío de campaña y firma de contrato.
+   Entrada premium del aviso; pop 1.0 → 1.08 → 1.0 en 100 ms en el ícono. */
+.toast-title{display:block;font-weight:700;font-size:16px;color:var(--ink);line-height:1.4}
+.toast{color:#3f5a48}
+.toast.error{color:#9a3a4c}
+.toast-moment{border-color:var(--navy);border-left-width:4px;animation:toast-moment-in var(--ms-move) var(--ease-premium) both}
+.toast-moment>svg{color:var(--navy);animation:moment-pop var(--ms-press) var(--ease-pop) var(--ms-move) both}
+.theme-vertia .toast-moment>svg{color:#2f7a14}
+@keyframes toast-moment-in{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+@keyframes moment-pop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* Accesibilidad: sin movimiento, mismo contenido y estado final. */
+@media(prefers-reduced-motion:reduce){
+  .sk,.busy-line::after{animation:none!important}
+  .btn:active:not(:disabled){transform:none}
+}

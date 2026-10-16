@@ -1,0 +1,38 @@
+/* Legibilidad: tamaño base, contraste de textos secundarios y menú lateral.
+   Se carga después de styles.css; no cambia estructura ni colores de marca. */
+:root{font-size:15px;--muted:#5e7182}
+body{-webkit-font-smoothing:antialiased;line-height:1.5}
+
+/* Menú lateral: más ancho para etiquetas legibles en una línea. */
+@media(min-width:961px){:root{--sidebar:256px}}
+.side-nav button{font-size:14.5px;color:#c3d0dd}
+.sidebar-bottom>a{color:#b4c4d4}
+.sidebar-demo small{color:#9fb3c6}
+
+/* Textos secundarios sobre fondo claro: contraste mínimo AA. */
+.eyebrow{color:#5e7182;letter-spacing:1.2px}
+.section-heading p{color:#4f6375;font-size:16px;max-width:760px}
+.panel-heading p{color:#5e7182}
+.metric-top{color:#4f6375}
+.callout{color:#4f6375}
+.info-banner{color:#3f6884}
+.detail-tabs button{color:#5e7182}
+.btn.secondary{color:#3c5468}
+.badge{color:#55697b}
+.badge-activo,.badge-completada,.badge-aprobada,.badge-aprobado,.badge-ganado,.badge-revelado,.badge-firmado{color:#2f6b45}
+.badge-borrador,.badge-nuevo{color:#52606f}
+.badge-en_revision,.badge-pendiente_aprobacion,.badge-pendiente,.badge-en_renovacion{color:#87601c}
+.badge-pendiente_firma,.badge-contactado,.badge-enviada,.badge-propuesta,.badge-programada{color:#33648d}
+.badge-respondió,.badge-reunión{color:#4f52a0}
+.badge-no_contactar,.badge-rechazado,.badge-perdido{color:#a1384a}
+
+/* Portada: texto introductorio y detalles con mejor contraste sobre fondo oscuro. */
+.hub-intro{font-size:18px;line-height:1.75;color:#b9cad8;max-width:540px}
+.hub-kicker{color:#a9bfd0}
+.hub-features{color:#55697b}
+.hub-proposal{color:#4b6478}
+@media(max-width:760px){.hub-intro{font-size:16.5px}}
+.hub-card>p{font-size:16px;line-height:1.7;color:#4f6375}
+.hub-features{flex-wrap:wrap;row-gap:8px}
+.hub-disclaimer{font-size:15px;line-height:1.8;color:#a3b8c9}
+.hub-disclaimer b{color:#d3e0ea}

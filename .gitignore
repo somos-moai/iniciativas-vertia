@@ -14,4 +14,10 @@ scripts/stop_duplicate_draft.py
 scripts/stop_duplicate_draft.ps1
 docs/coordination/claude-provider-output.json
 *.zip
+uploads/
+*.htpasswd
+frontend/add-qualification.cjs
+frontend/finish-integration.cjs
+frontend/integrate-workspaces.cjs
+frontend/qa-fix-selectors.cjs
 

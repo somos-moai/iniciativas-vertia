@@ -3,7 +3,7 @@ from pathlib import Path
 import json, re, shutil, subprocess, zipfile
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'deliverables'
-for name in ['requerimientos-cliente.md','protocolo-soporte.md','roadmap-regional.md','scope-roadmap.json','supuestos.md']:
+for name in ['requerimientos-cliente.md','protocolo-soporte.md','roadmap-regional.md','flujos-y-modelo-datos.md','scope-roadmap.json','supuestos.md']:
     shutil.copy2(ROOT/'docs/commercial'/name,OUT/name)
 readme='''# Entrega comercial MoAI para Vertia
 
@@ -20,19 +20,22 @@ Las propuestas fijan UF de contratación, IVA del 19 % separado y un calendario
 de 40 % inicial más seis cuotas de saldo. PAGOS_UF_v1.json contiene los importes
 conciliados y sus fuentes; no es un archivo de importación a un sistema CLP.
 
-Anexos: requerimientos a cargo de Vertia, protocolo de soporte y roadmap regional.
+Anexos: requerimientos a cargo de Vertia, protocolo de soporte, roadmap regional
+y flujos completos con el modelo demostrado y los supuestos de cada proyecto.
 Los límites operativos y las condiciones de soporte son propuestas a formalizar.
 Los costos de AWS, PostgreSQL, IA, OCR, prospectos y herramientas externas durante
 desarrollo, pruebas y producción corresponden a Vertia.
 
-Las maquetas son funcionales con datos sintéticos; integraciones y análisis son
-simulados. El desarrollo productivo se delimita en cada propuesta.
+El catálogo inicial es sintético; perfilamiento, archivos cargados y lectura/OCR
+local son reales. Claude API, correo, prospectos, POST y firma siguen simulados.
+El desarrollo productivo se delimita en cada propuesta.
 
 Claude Code participó en los documentos. Codex implementó y verificó las maquetas.
-La revisión de Gemini en Antigravity está preparada y permanece pendiente.
+Gemini en Antigravity registró su revisión inicial; la nueva experiencia tiene
+un encargo de revisión separado, sin atribuir pruebas que no se han ejecutado.
 '''
 (OUT/'LEER_PRIMERO.md').write_text(readme,encoding='utf-8')
-names=['LEER_PRIMERO.md','PAGOS_UF_v1.json','requerimientos-cliente.md','protocolo-soporte.md','roadmap-regional.md','scope-roadmap.json','supuestos.md']
+names=['LEER_PRIMERO.md','PAGOS_UF_v1.json','requerimientos-cliente.md','protocolo-soporte.md','roadmap-regional.md','flujos-y-modelo-datos.md','scope-roadmap.json','supuestos.md']
 names += [f'{ident}.{ext}' for ident in ['prospectador','contratos'] for ext in ['html','docx','pdf']]
 target=OUT/'Vertia_Propuestas_y_Anexos_2026-10-15.zip'
 with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as archive:

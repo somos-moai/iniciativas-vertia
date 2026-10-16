@@ -68,3 +68,34 @@ Propuestas públicas servidas desde `/home/moai/iniciativas-vertia/deliverables`
 ## Acceso a agentes y repositorio
 
 Consulta de estado sin extraer credenciales: CLI Claude disponible en `/usr/bin/claude`; archivos de autenticación Claude y Gemini presentes bajo root. Gemini y gh no aparecen en PATH. El SSH de root a GitHub no autentica; el usuario `moai` autentica mediante una deploy key identificada como `somos-moai/Ecosistema-MoAI`, perteneciente a otro repositorio. Esa clave no acredita permisos de escritura sobre `somos-moai/iniciativas-vertia` y no se reconfigura ni reutiliza como credencial general.
+
+## Preparación de la iteración documental real
+
+La infraestructura quedó preparada sin reiniciar el backend actual: Tesseract 4.1.1 con `spa`, `eng` y `osd`; pypdf 6.20.1, pypdfium2 5.14.0, Pillow 12.3.0 y python-multipart 0.0.32 en el entorno exclusivo. apt instaló 7 paquetes nuevos, 24,1 MB adicionales y cero actualizaciones. La memoria disponible antes de instalar era aproximadamente 2,5 GiB y el disco libre 25 GiB. Se usó `NEEDRESTART_MODE=l` para listar necesidades existentes sin reiniciar otros servicios.
+
+Directorio de uploads privado preparado con modo `0700`, propietario `moai`, y variable `UPLOAD_DIR` remota; `.env` permanece en `0600`. nginx ajustado a 16 MB y 120 segundos. Credencial HTTP privada preparada remotamente y entregada únicamente mediante archivo local fuera del repositorio; no está en código, documentos públicos ni logs. Durante la preparación se mantuvo la autenticación inactiva; su activación final se registra abajo.
+
+Validación previa al despliegue: código copiado a un staging aislado bajo `qa-staging`, sin reemplazar archivos de la aplicación pública ni reiniciar su servicio. **15 pruebas aprobadas en 5,17 segundos** sobre PostgreSQL 16 y Tesseract reales. Incluyen PDF, revisión humana, bytes originales, ACL, archivos vacíos/corruptos/fuera de límite, permisos entre países, invalidación de acceso con nueva versión, OCR de imagen e ICP con evidencia explícita. El cap final autorizado es de **40 páginas PDF**, 15 MB y 90 segundos de procesamiento, con concurrencia uno. La suite usa esquemas temporales propios y archivos de prueba en directorios temporales.
+
+Última copia completa del backend congelado validada en staging: **15/15 pruebas aprobadas en 4,64 segundos**. Para QA de interfaz se habilitó temporalmente `iniciativas-vertia-uiqa.service` sobre `127.0.0.1:8790`, con esquema PostgreSQL y uploads temporales propios y límites de 640 MB/75% CPU. Acceso local por túnel SSH en `127.0.0.1:8000`; no existe proxy público a ese puerto. El frontend puede probar procesos reales sin publicar funcionalidades nuevas ni modificar el servicio actual. Detener el servicio y túnel de QA cuando termine la validación final.
+
+## Publicación privada de la versión documental
+
+Publicación final autorizada por el coordinador el 15 de octubre de 2026, hora de Chile. Se ejecutó la suite completa nuevamente: **15 pruebas aprobadas en 5,67 segundos**. HTTP Basic se activó y validó en nginx **antes** de reiniciar la versión que permite uploads. nginx conserva TLS; `/`, aplicaciones, API, propuestas, assets y muestras responden **401 sin credencial y 200 con credencial**, verificadas por HTTPS. La credencial se encuentra únicamente en el archivo local `Acceso_Maquetas_Vertia.txt`, fuera del repositorio, y en almacenamiento privado remoto; nunca se imprime en los resultados.
+
+El arranque tardó unos tres segundos; la comprobación inicial fija de dos segundos se adelantó al listener. Se verificó que la aplicación inició correctamente y se sustituyó esa espera por reintentos limitados en el script de despliegue. Se completó nginx con 16 MB y 120 segundos. No se modificó ningún servicio ajeno.
+
+QA por HTTPS contra el servicio real con sus restricciones systemd: carga de PDF de texto y PNG, extracción/OCR reales, original descargado con hash idéntico, preview PNG válida, rechazo 403 del original a un perfil de otro país, campos conservados sin sobrescritura automática y revisión humana persistida en PostgreSQL. Se crearon solamente dos contratos sintéticos de QA. Claude permanece desconectado; no se consumieron APIs de IA.
+
+El servicio público quedó activo con aproximadamente 62 MB de memoria en reposo; memoria disponible del VPS 2,7 GiB y disco libre 25 GiB. Se comprobaron uploads `0700`, archivos `0600` y htpasswd `root:www-data 0640`. Tras QA se detuvieron exclusivamente `iniciativas-vertia-uiqa.service` y el túnel SSH propio de puerto local 8000; el puerto de staging 8790 dejó de escuchar. No se borraron uploads de la aplicación ni datos de usuarios.
+
+Fuente de publicación: repositorio `somos-moai/iniciativas-vertia`, árbol de trabajo coordinado y congelado antes del despliegue; commit final a cargo del coordinador. Los hashes locales se compararon con las respuestas HTTPS autenticadas y coinciden:
+
+| Archivo | SHA256 |
+|---|---|
+| `frontend/dist/assets/index-VONnwKLm.js` | `17de9634ab88aa58298be65cc7a22324dd537090231dc3d74d958c051efc8209` |
+| `frontend/dist/assets/index-CTvZoLKH.css` | `f31183cbc61417410d380658ed46832c31f1ad70f5ecdbd71901ccc56929b3ac` |
+| `deliverables/prospectador.pdf` | `c3a45e2e59b4c065b27b319312f25faee4616d4961ffc09a05b5a9519a05aa29` |
+| `deliverables/contratos.pdf` | `a065814c49f24632e4cc78a0ffb19f67d4f99dfb88ad34d8e22a76925f033259` |
+| `frontend/dist/samples/contrato_servicios_demostracion.pdf` | `873c34066a47422f9f0f6f22b79ec1bcf7b15973f6152230e923d4a33451f350` |
+| `frontend/dist/samples/contrato_imagen_demostracion.png` | `afb096519d6d2167f63a8289ec6a1103174b96fe8b3b3844cf5ecdc9c61a46ee` |

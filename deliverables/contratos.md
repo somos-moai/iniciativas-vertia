@@ -36,13 +36,13 @@ Más adelante, cuando se acerca un vencimiento o una renovación, el sistema avi
 
 Nota: lo que el prototipo de demostración muestra opera con datos simulados y sin integraciones reales; está rotulado como demostración y no constituye producto final.
 
-## Alcance incluido  con límites propuestos
+## Alcance incluido, con límites propuestos
 
 ### Repositorio y ficha del contrato
 
 Repositorio estructurado con metadata y una única versión vigente por contrato. Ficha con tipos de contrato, estados, versiones, anexos y enmiendas. Límite propuesto: un catálogo acotado de tipos de contrato y plantillas, definido en el levantamiento, con un número razonable de plantillas iniciales como condición de la propuesta. Ampliar el catálogo se gestiona por control de cambios.
 
-### Solicitudes  clasificación y versiones
+### Solicitudes, clasificación y versiones
 
 Solicitud desde la oportunidad, clasificación, control de versiones y gestión de permisos por país y sociedad. Acceso entre países mediante aprobación explícita.
 
@@ -50,11 +50,11 @@ Solicitud desde la oportunidad, clasificación, control de versiones y gestión 
 
 Saneamiento de copia con revisión humana y registro de auditoría append-only de las acciones relevantes (quién, qué, cuándo, con qué aprobación).
 
-### OCR  búsqueda y asistencia con Claude
+### OCR, búsqueda y asistencia con Claude
 
 OCR sobre documentos cargados, búsqueda de texto completo con filtros, y asistencia con Claude para resumen, extracción y preguntas sobre el contenido, con marca explícita de contenido generado por IA. Las credenciales y cuentas de OCR y Claude las provee Vertia.
 
-### Alertas  revisión y aprobación
+### Alertas, revisión y aprobación
 
 Alertas parametrizables por fecha crítica (ventanas de referencia 90, 60, 30, 15 y 7 días, ajustables). Workflow de revisión y aprobación configurable y acotado, con reglas, SLA y delegación. Límite propuesto: el flujo cubre un conjunto acotado de reglas y niveles de aprobación definidos en el levantamiento, no un motor de reglas arbitrariamente extensible.
 
@@ -83,11 +83,11 @@ MVP documental de referencia: semanas 1 a 7. Flujo, firma y validación: semanas
 
 ## Fases
 
-### Fase 1   MVP documental
+### Fase 1 — MVP documental
 
 Repositorio, ficha, versiones, permisos por país y sociedad, OCR, búsqueda, asistencia con Claude, auditoría y configuración regional base. El objetivo es gestionar el documento contractual como system of record, con una única versión vigente y trazabilidad.
 
-### Fase 2   Flujo contractual y firma
+### Fase 2 — Flujo contractual y firma
 
 Workflow de revisión y aprobación acotado, alertas de obligaciones e hitos, y la integración de firma con un proveedor, operando sobre un piloto de un país. El objetivo es cerrar el ciclo solicitud, aprobación y firma con evidencia.
 
@@ -132,7 +132,7 @@ La entrega se considera aceptada cuando se verifica, con datos reales del piloto
 
 
 
-## Soporte propuesto  contratado por separado
+## Soporte propuesto (contratado por separado)
 
 Soporte mensual de 12 horas, de referencia USD 490,49 netos (UF 11,7613) al mes, convertido a UF en el presupuesto y cobrado desde la puesta en producción. Horario L a V de 09:00 a 18:00 hora de Chile, salvo festivos. Primera respuesta para incidencias críticas en 4 horas hábiles y para el resto en 1 día hábil; la resolución depende del diagnóstico. Las mejoras y funciones nuevas se gestionan por control de cambios y no se descuentan de las horas de soporte.
 
@@ -140,7 +140,7 @@ Soporte mensual de 12 horas, de referencia USD 490,49 netos (UF 11,7613) al mes,
 
 Se incluye una garantía de 60 días corridos desde la aceptación, por defectos atribuibles al desarrollo dentro del alcance entregado. La garantía no consume horas de soporte.
 
-## Propiedad  licencias y cambios de alcance
+## Propiedad, licencias y cambios de alcance
 
 El entregable desarrollado específicamente para Vertia queda a su disposición según los términos del contrato. Los componentes base y herramientas preexistentes de MoAI se licencian para su uso en esta solución. Las licencias y cuentas de terceros (OCR, Claude, firma, M365, Entra ID) son contratadas y pagadas por Vertia a su nombre. Todo cambio de alcance —incluidas ampliaciones del catálogo de tipos, plantillas, reglas, países más allá de la configuración base, proveedores de firma adicionales o integraciones complejas— se acuerda por escrito mediante control de cambios, con su efecto en plazo e inversión.
 

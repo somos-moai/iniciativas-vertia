@@ -2,6 +2,8 @@
 
 Dos iniciativas independientes para Vertia Group, coordinadas por MoAI: Prospectador comercial para Global Vía Pública y Gestión Contractual para Vertia. Logística se deja para una etapa posterior.
 
+Continuación solicitada por el usuario: [handoff para Claude Code y Gemini](HANDOFF_CLAUDE.md). Contiene el estado publicado y el defecto abierto al consultar los campos propuestos de una versión documental anterior; no dar la entrega por cerrada antes de corregirlo y verificarlo.
+
 ## Demostración y propuestas
 
 - Centro de demostración: https://iniciativasvertia.somosmoai.tech/
@@ -12,7 +14,11 @@ Dos iniciativas independientes para Vertia Group, coordinadas por MoAI: Prospect
 - Operación y soporte: [docs/commercial/protocolo-soporte.md](docs/commercial/protocolo-soporte.md).
 - Alcance y roadmap: [docs/commercial/scope-roadmap.json](docs/commercial/scope-roadmap.json).
 
-Las aplicaciones usan datos ficticios persistentes en PostgreSQL. Los perfiles seleccionables permiten revisar permisos; ese selector no es autenticación productiva. Envíos, IA, OCR, firmas, prospectos y POST están simulados. No existen firmas legales ni mensajes enviados a terceros. No cargar información real ni credenciales en esta maqueta.
+La portada explica primero ambos proyectos, sus recorridos animados y explorables, los modelos de datos propuestos y el roadmap regional. Después ofrece acceso a las aplicaciones. Los perfiles seleccionables permiten revisar permisos; ese selector no es autenticación productiva.
+
+El catálogo inicial usa datos ficticios persistentes en PostgreSQL. El perfilamiento comercial guarda criterios y evidencia con resultados explicables. La carga de PDF e imágenes, su extracción de texto, OCR local y confirmación humana son reales. Claude API, correo, firmas, prospectos y POST permanecen simulados; no existen firmas legales ni mensajes enviados a terceros. La lectura local no realiza una evaluación jurídica con IA.
+
+El sitio se protege antes de habilitar cargas reales. Las credenciales se entregan en un archivo privado fuera del repositorio. Nunca guardar claves ni documentos de los usuarios en Git. Ver `docs/API_UPLOADS.md` para límites, versiones, evidencia y permisos de lectura.
 
 ## Acuerdos comerciales
 
@@ -24,7 +30,7 @@ Los importes, fuentes de conversión y las siete cuotas de cada iniciativa está
 
 - Codex: backend, frontend, pruebas PostgreSQL, integración, documentos finales y despliegue.
 - Claude Code: elaboración real de propuestas y revisión de alcance; registro en `docs/coordination/claude.md`.
-- Gemini mediante Antigravity: encargo preparado; revisión real pendiente. Ver `GEMINI.md`, `docs/tasks/GEMINI_FRONTEND.md` y `docs/coordination/gemini.md`. No atribuir autoría ni validación sin evidencia.
+- Gemini mediante Antigravity: revisión inicial registrada en `docs/coordination/gemini.md`; el encargo de la nueva experiencia está en `docs/coordination/ENCARGO_EXPERIENCIA_V2.md`. No atribuir pruebas nuevas hasta recibir evidencia.
 
 Leer `AGENTS.md`, `docs/BRIEF.md` y `docs/API_CONTRACT.md` antes de modificar. Los agentes registran decisiones y hallazgos en `docs/coordination/`, trabajan con cambios delimitados y no guardan secretos. Los documentos de contexto están en `docs/context/`; el proyecto compartido conserva los originales.
 

@@ -34,15 +34,15 @@ Sobre esa base prepara una campaña. El sistema genera borradores adecuados al r
 
 Durante el día llegan respuestas. El sistema las sincroniza desde los buzones autorizados, las asocia a la conversación correcta, notifica al ejecutivo y detiene el seguimiento automático de esa conversación. Un agente sugiere el estado comercial de la respuesta; el ejecutivo lo confirma o lo corrige. Las reuniones del calendario se vinculan a los contactos. Al cierre de mes, las métricas de gestión ya están construidas a partir de los registros, no de una planilla rehecha.
 
-## Alcance incluido  con límites propuestos
+## Alcance incluido, con límites propuestos
 
 El alcance siguiente se entrega como producto funcional. Donde corresponde se proponen límites concretos, que se incorporan como condiciones de la propuesta y no como aceptaciones ya existentes.
 
-### Identidad  roles y cartera
+### Identidad, roles y cartera
 
 Inicio de sesión con identidad corporativa de Vertia mediante Microsoft Entra ID. Separación de contactos, historial y gestión por ejecutivo, validada en el servidor. Roles de referencia: ejecutivo, jefatura, administrador funcional y soporte. El alcance exacto de jefatura y administración se acuerda en el levantamiento; no se asume acceso irrestricto a todas las carteras.
 
-### Empresas  contactos e historial
+### Empresas, contactos e historial
 
 Mantención de empresas y contactos con sus relaciones (agencia y anunciante diferenciados), historial cronológico de correos, respuestas, rebotes, reuniones y cambios de estado. Importación de las planillas actuales con vista previa, mapeo, validación y reporte de errores; repetir una importación no duplica registros válidos. Detección de duplicados por identificador de proveedor, email normalizado y empresa.
 
@@ -54,7 +54,7 @@ Integración con un proveedor de datos tipo Lusha, mediante su API oficial y con
 
 Creación de campañas con destinatarios revisables, borradores asistidos, secuencias de seguimiento y aprobación humana explícita para cada envío individual o en lote. Integración con Microsoft 365 (Graph) para enviar desde la identidad autorizada del ejecutivo y para leer calendario, sujeta a los permisos que habilite TI de Vertia. Cola de envíos con identificador único para evitar duplicados ante reintentos. Límites configurables por buzón, campaña y horario.
 
-### Respuestas  exclusiones y seguimiento
+### Respuestas, exclusiones y seguimiento
 
 Sincronización de respuestas y rebotes, vinculación a la conversación correcta, detención del seguimiento ante una respuesta, y registro de solicitudes de no contacto que excluyen a la persona de futuras campañas. Clasificación asistida del estado comercial, con confirmación del ejecutivo.
 
@@ -77,11 +77,11 @@ Fase MVP de referencia: semanas 1 a 6. Consolidación, aceptación y publicació
 
 ## Fases
 
-### Fase 1   MVP con Agus en Uruguay
+### Fase 1 — MVP con Agus en Uruguay
 
 Puesta en marcha del núcleo en infraestructura de Vertia, con Agustín Silva como usuario referente: cartera aislada, importación de datos reales, enriquecimiento con un proveedor, campañas con aprobación, seguimiento y métricas base. El objetivo es operar el ciclo completo con datos reales de un ejecutivo.
 
-### Fase 2   Consolidación con el equipo
+### Fase 2 — Consolidación con el equipo
 
 Extensión a un grupo comercial controlado, ajuste de roles de jefatura, refinamiento de métricas y estabilización operativa. Se incluye además el diseño y mapeo de la consolidación hacia POST y una interfaz simple de intercambio sobre una API documentada y autorizada. Si no existe una API validada, el alcance incluido es un intercambio de archivos validado (importación/exportación), y el conector específico se estima por separado.
 
@@ -125,7 +125,7 @@ La entrega se considera aceptada cuando, con datos reales de la cartera de refer
 
 
 
-## Soporte propuesto  contratado por separado
+## Soporte propuesto (contratado por separado)
 
 Soporte mensual de 8 horas, de referencia USD 326,99 netos (UF 7,8408) al mes, convertido a UF en el presupuesto y cobrado desde la puesta en producción. Horario L a V de 09:00 a 18:00 hora de Chile, salvo festivos. Primera respuesta para incidencias críticas en 4 horas hábiles y para el resto en 1 día hábil; la resolución depende del diagnóstico. Las mejoras y funciones nuevas se gestionan por control de cambios y no se descuentan de las horas de soporte.
 
@@ -133,7 +133,7 @@ Soporte mensual de 8 horas, de referencia USD 326,99 netos (UF 7,8408) al mes, c
 
 Se incluye una garantía de 60 días corridos desde la aceptación, por defectos atribuibles al desarrollo dentro del alcance entregado. La garantía no consume horas de soporte.
 
-## Propiedad  licencias y cambios de alcance
+## Propiedad, licencias y cambios de alcance
 
 El entregable desarrollado específicamente para Vertia queda a su disposición según los términos del contrato. Los componentes base y herramientas preexistentes de MoAI se licencian para su uso en esta solución. Las licencias y cuentas de terceros son contratadas y pagadas por Vertia a su nombre. Todo cambio de alcance se acuerda por escrito mediante control de cambios, con su efecto en plazo e inversión.
 

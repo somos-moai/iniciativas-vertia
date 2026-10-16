@@ -1,4 +1,7 @@
-"""Functional, synthetic demonstration. All integrations are deliberately mocked."""
+"""Regional demo with synthetic fixtures and real private document processing.
+
+Paid external providers remain disconnected; local extraction is explicitly identified.
+"""
 import csv
 import hashlib
 import html
@@ -6,6 +9,7 @@ import io
 import json
 import os
 import re
+import shutil
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone, date
 from typing import Any, Literal
@@ -13,15 +17,15 @@ from uuid import uuid4
 from pathlib import Path
 
 from fastapi import FastAPI, Depends, Header, HTTPException, Query
-from fastapi.responses import HTMLResponse, Response, FileResponse
+from fastapi.responses import HTMLResponse, Response, FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session, sessionmaker
 
-from .db import Record, make_engine, initialize
+from .db import Record, DocumentUpload, make_engine, initialize
 from .seed import USERS, COUNTRIES
 
-KINDS = ["companies","contacts","campaigns","activities","opportunities","prospects","messages","contracts","access_requests","obligations","audit","notifications"]
+KINDS = ["companies","contacts","campaigns","activities","opportunities","prospects","messages","contracts","access_requests","obligations","audit","notifications","icp_profiles"]
 APPS = {"prospectador","contratos"}
 
 def now():
@@ -42,6 +46,21 @@ app = FastAPI(title="Vertia · Demostración sintética", version="1.0.0", lifes
 
 @app.middleware("http")
 async def private_demo_responses(request,call_next):
+    if request.method=="POST" and request.url.path.endswith(("/uploads","/upload")):
+        limit=15*1024*1024+128*1024
+        try:
+            if int(request.headers.get("content-length","0"))>limit:
+                return JSONResponse({"detail":"El archivo excede el máximo de 15 MB"},status_code=413)
+        except ValueError:
+            return JSONResponse({"detail":"Content-Length inválido"},status_code=400)
+        received=0; original_receive=request._receive
+        async def bounded_receive():
+            nonlocal received
+            message=await original_receive()
+            received+=len(message.get("body",b""))
+            if received>limit: raise HTTPException(413,"El archivo excede el máximo de 15 MB")
+            return message
+        request._receive=bounded_receive
     response=await call_next(request)
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"]="no-store"
@@ -107,8 +126,8 @@ def allowed(s, user, r):
         return d.get("requested_by")==user["id"] or (d.get("country")==user["country"] and user["role"] in {"manager","legal"})
     if d.get("country")==user["country"]:
         return True
-    cid=d.get("contract_id") if r.kind!="contracts" else r.id
-    return bool(cid and granted(s,user,cid))
+    # Country grants authorize the approved sanitized rendition, not source text.
+    return bool(r.kind=="contracts" and granted(s,user,r.id))
 
 def read(s,user,r):
     if not allowed(s,user,r):
@@ -167,8 +186,10 @@ def fingerprint(d):
 
 def integrations(application):
     names=[("PostgreSQL","conectado","Persistencia real de demostración")]
-    names += [(n,"simulado","Sin conexión ni consumos externos") for n in (["Lusha","Microsoft 365","Claude","POST"] if application=="prospectador" else ["OCR","Claude","Firma electrónica"])]
-    return [{"id":n.lower().replace(" ","-"),"name":n,"status":st,"description":desc,"mode":"synthetic" if st=="simulado" else "postgresql"} for n,st,desc in names]
+    names += [(n,"simulado","Sin conexión ni consumos externos") for n in (["Lusha","Microsoft 365","Claude","POST"] if application=="prospectador" else ["Claude","Firma electrónica"])]
+    if application=="contratos":
+        names.append(("OCR local","conectado" if shutil.which("tesseract") else "no_disponible","Lectura PDF real y OCR Tesseract local; no consume API externa"))
+    return [{"id":n.lower().replace(" ","-"),"name":n,"status":st,"description":desc,"mode":"postgresql" if n=="PostgreSQL" else "local_extraction" if n=="OCR local" else "synthetic"} for n,st,desc in names]
 
 def state(s,user,application):
     if application not in APPS:
@@ -179,6 +200,8 @@ def state(s,user,application):
             d=dict(r.data)
             if r.kind=="contracts":
                 d.update({"can_access":True,"can_edit":user["role"]!="viewer" and (user["role"]=="regional" or d["country"]==user["country"]),"restricted":False})
+                if user["role"]!="regional" and d["country"]!=user["country"]:
+                    d={"id":r.id,"title":"Documento con acceso a extracto saneado","name":"Extracto regional autorizado","reference":d["reference"],"country":d["country"],"status":d["status"],"confidential":True,"can_access":True,"can_edit":False,"can_view_original":False,"access_scope":"redacted_only","restricted":False,"sanitized_only":True,"redacted_ready":d.get("redacted_ready",False),"documents":[],"history":[],"analysis":None}
             if r.kind=="prospects" and not d.get("revealed"):
                 d["email"]=None
                 d["phone"]=None
@@ -198,7 +221,10 @@ def state(s,user,application):
     pipeline=sum(o.get("amount",0) for o in out["opportunities"] if o.get("status") not in {"perdido","ganado"})
     out["metrics"]={"companies":len(out["companies"]),"contacts":len(contacts),"total_contacts":len(contacts),"prospects":len(out["prospects"]),"campaigns":len(out["campaigns"]),"active_campaigns":sum(c.get("status")=="enviada" for c in out["campaigns"]),"sent":sent,"replies":replies,"reply_rate":round(replies/max(sent,1)*100,1),"meetings":sum(a.get("type")=="meeting" for a in out["activities"]),"pipeline":pipeline,"pipeline_value":pipeline,"excluded":sum(c.get("excluded",False) for c in contacts),"contracts":len(contracts),"total_contracts":len(contracts),"active_contracts":sum(c.get("status")=="activo" for c in contracts),"pending_approval":sum(c.get("status") in {"en_revision","pendiente_aprobacion"} for c in contracts),"pending_signature":sum(c.get("status")=="pendiente_firma" for c in contracts),"expiring_soon":sum(0<=(date.fromisoformat(c["end_date"])-date.today()).days<=90 for c in contracts if c.get("end_date")),"overdue_obligations":overdue,"obligations":len(obligations),"contract_value":sum(c.get("amount",0) for c in contracts),"access_requests":sum(r.get("status")=="pendiente" for r in out["access_requests"])}
     used=sum(bool(p.get("revealed")) for p in out["prospects"])
+    out["data_mode"]="fixtures_and_user_uploads" if any(c.get("has_real_uploads") for c in contracts) else "synthetic"
     credit_limit=250*max(1,len({p.get("owner_id") for p in out["prospects"]}))
+    active_icp=[c for c in out["icp_profiles"] if c.get("status")=="activo"]
+    out["icp"]=next((c for c in active_icp if c.get("owner_id")==user["id"]),active_icp[0] if active_icp else None)
     out.update({"viewer":user,"users":USERS,"countries":COUNTRIES,"integrations":integrations(application),"credits":{"used":used,"limit":credit_limit,"remaining":max(credit_limit-used,0),"provider":"Lusha simulado","scope":"250 por cartera; agregado visible"},"generated_at":now(),"mode":"synthetic","roadmap":[{"id":"mvp","name":"MVP operativo","title":"MVP operativo","status":"incluido","description":"Piloto con perfiles, aprobaciones y trazabilidad"},{"id":"regional","name":"Consolidación regional","title":"Consolidación regional","status":"incluido","description":"Configuración base de cinco países, validación local por Vertia"},{"id":"evolution","name":"Evolución especializada","title":"Evolución especializada","status":"ampliacion","description":"WhatsApp/LinkedIn y conectores adicionales" if application=="prospectador" else "ERP avanzado, portal externo, add-in Word y analítica predictiva"}]})
     return out
 
@@ -219,6 +245,9 @@ def get_state(app:Literal["prospectador","contratos"],s:Session=Depends(session)
 
 def crm_action(s,user,a):
     p=a.payload; action=a.action; entity=None
+    if action in {"save_icp","profile_company","evaluate_company","enrich_company"}:
+        from .profiling import profile_action
+        return profile_action(s,user,a)
     def target(kind):
         r=get(s,a.app,kind,a.entity_id or p.get(f"{kind.rstrip('s')}_id"))
         write(s,user,r)
@@ -260,9 +289,13 @@ def crm_action(s,user,a):
         cc=country_field(user,p)
         if user["role"]=="legal": fail("Perfil Legal sin prospección",403)
         query=text_field(p,"query",limit=200)
+        selected_company=None
+        if p.get("company_id"):
+            selected_company=get(s,a.app,"companies",p["company_id"]); write(s,user,selected_company)
+            if selected_company.data["country"]!=cc: fail("La empresa y búsqueda deben compartir país")
         for i in range(3):
             token=uuid4().hex[:6]
-            entity=new(s,a.app,"prospects",name=f"Contacto {i+1} · {query}",email=f"candidato-{token}@prospectos-{cc.lower()}.example",title="Responsable de Marketing",company_name=f"{query} · Empresa ficticia {i+1}",country=cc,owner_id=user["id"],sector=p.get("sector","Retail"),score=91-i*8,status="pendiente",revealed=False,source="Lusha simulado",credit_cost=1)
+            entity=new(s,a.app,"prospects",name=f"Contacto demo {i+1} · {query}",email=f"candidato-{token}@prospectos-{cc.lower()}.example",title="Responsable de Marketing",company_id=selected_company.id if selected_company else None,company_name=selected_company.data["name"] if selected_company else f"{query} · Empresa ficticia {i+1}",country=cc,owner_id=selected_company.data["owner_id"] if selected_company else user["id"],sector=p.get("sector","Retail"),score=None,status="pendiente",revealed=False,source="Lusha simulado · contacto ficticio; no se consultó una fuente externa",credit_cost=1)
     elif action=="reveal_contact":
         entity=get(s,a.app,"prospects",a.entity_id or p.get("prospect_id")); write(s,user,entity)
         if entity.data.get("revealed"): fail("El prospecto ya fue revelado; no se descuentan créditos adicionales",409)
@@ -276,8 +309,11 @@ def crm_action(s,user,a):
             read(s,user,existing)
             save(s,entity,revealed=True,status="revelado",contact_id=existing.id)
         else:
-            co=new(s,a.app,"companies",name=d["company_name"],country=d["country"],owner_id=d["owner_id"],sector=d.get("sector","Otros"),domain=d["email"].split("@")[1],status="activo")
-            contact=new(s,a.app,"contacts",**{k:d[k] for k in ["name","email","title","country","owner_id","score"]},company_id=co.id,company_name=co.data["name"],status="nuevo",excluded=False,source="Lusha simulado")
+            if d.get("company_id"):
+                co=get(s,a.app,"companies",d["company_id"]); write(s,user,co)
+            else:
+                co=new(s,a.app,"companies",name=d["company_name"],country=d["country"],owner_id=d["owner_id"],sector=d.get("sector","Otros"),domain=d["email"].split("@")[1],status="activo")
+            contact=new(s,a.app,"contacts",**{k:d[k] for k in ["name","email","title","country","owner_id","score"]},company_id=co.id,company_name=co.data["name"],status="nuevo",excluded=False,source="Lusha simulado · contacto ficticio")
             save(s,entity,revealed=True,status="revelado",contact_id=contact.id)
     elif action=="create_campaign":
         ids=p.get("contact_ids",[])
@@ -287,7 +323,16 @@ def crm_action(s,user,a):
             write(s,user,c)
             if c.data.get("excluded"): fail("La campaña contiene contactos excluidos",409)
         if len({c.data["country"] for c in contacts})!=1: fail("Cada campaña debe corresponder a un país")
-        entity=new(s,a.app,"campaigns",name=text_field(p,"name"),country=contacts[0].data["country"],owner_id=user["id"],contact_ids=[c.id for c in contacts],subject=text_field(p,"subject","Propuesta de visibilidad",limit=300),body=text_field(p,"body","Borrador pendiente de revisión humana",limit=20000),status="borrador",approved_by=None,sent_count=0,reply_count=0)
+        note=p.get("qualification_note","")
+        if not isinstance(note,str) or len(note)>2000: fail("Nota de selección inválida")
+        context=p.get("qualification_context",{})
+        if not isinstance(context,dict): fail("Contexto de selección inválido")
+        co_ids=sorted({c.data["company_id"] for c in contacts})
+        snapshot=None
+        if context.get("icp_id"):
+            criteria=get(s,a.app,"icp_profiles",context["icp_id"]); read(s,user,criteria); snapshot=criteria.data
+        qualification={"icp_id":snapshot["id"] if snapshot else None,"icp_version":snapshot.get("version") if snapshot else None,"criteria_snapshot":snapshot,"company_ids":co_ids,"selected_by":user["id"],"selected_at":now(),"user_note":note}
+        entity=new(s,a.app,"campaigns",name=text_field(p,"name"),country=contacts[0].data["country"],owner_id=user["id"],contact_ids=[c.id for c in contacts],subject=text_field(p,"subject","Propuesta de visibilidad",limit=300),body=text_field(p,"body","Borrador pendiente de revisión humana",limit=20000),status="borrador",approved_by=None,sent_count=0,reply_count=0,qualification_note=note,qualification_context=qualification)
     elif action in {"set_campaign_content","draft_campaign","approve_campaign","send_campaign"}:
         entity=target("campaigns"); d=entity.data
         if d["status"]=="enviada": fail("La campaña ya fue enviada",409)
@@ -377,7 +422,7 @@ def contract_action(s,user,a):
         return new(s,a.app,"access_requests",contract_id=entity.id,title="Solicitud de acceso entre países",country=entity.data["country"],owner_id=user["id"],requested_by=user["id"],requester_name=user["name"],reason=text_field(p,"reason","Consulta de antecedente regional"),status="pendiente")
     write(s,user,entity)
     d=entity.data
-    transition={"submit_review":({"borrador","rechazado"},"en_revision",None),"approve_contract":({"en_revision","pendiente_aprobacion"},"aprobado",{"regional","manager","legal"}),"reject_contract":({"en_revision","pendiente_aprobacion"},"rechazado",{"regional","manager","legal"}),"send_signature":({"aprobado"},"pendiente_firma",{"regional","manager","legal"}),"sign_contract":({"pendiente_firma"},"firmado",{"regional","manager","legal"}),"activate_contract":({"firmado"},"activo",{"regional","manager","legal"})}
+    transition={"submit_review":({"borrador","rechazado","en_renovacion"},"en_revision",None),"approve_contract":({"en_revision","pendiente_aprobacion"},"aprobado",{"regional","manager","legal"}),"reject_contract":({"en_revision","pendiente_aprobacion"},"rechazado",{"regional","manager","legal"}),"send_signature":({"aprobado"},"pendiente_firma",{"regional","manager","legal"}),"sign_contract":({"pendiente_firma"},"firmado",{"regional","manager","legal"}),"activate_contract":({"firmado"},"activo",{"regional","manager","legal"})}
     if action in transition:
         previous,following,roles=transition[action]
         if roles: write(s,user,entity,roles)
@@ -386,20 +431,36 @@ def contract_action(s,user,a):
         changes={"status":following,"history":d.get("history",[])+[{"status":following,"at":now(),"by":user["id"],"note":p.get("reason","Transición del flujo demo")} ]}
         if action in {"send_signature","sign_contract"}: changes["signature"]={"provider":"Firma electrónica simulada","legal_signature":False,"status":"firmado_simulado" if action=="sign_contract" else "enviado_simulado","at":now(),"by":user["id"]}
         save(s,entity,**changes)
+    elif action=="review_extraction":
+        from .document_routes import review_extraction
+        review_extraction(s,user,entity,p)
     elif action=="upload_document":
+        if d.get("has_real_uploads"): fail("Este contrato contiene documentos reales; cargue la nueva versión con el selector de archivos",409)
         filename=text_field(p,"filename",limit=200)
         if "/" in filename or "\\" in filename: fail("Nombre de archivo inválido")
         if d["status"] not in {"borrador","rechazado","en_renovacion"}: fail("Los documentos solo se modifican en borrador, rechazo o renovación",409)
         ver=d.get("version",0)+1
         save(s,entity,version=ver,documents=d.get("documents",[])+[{"id":f"doc-{uuid4().hex[:8]}","filename":filename,"kind":p.get("kind","contrato"),"version":ver,"created_at":now(),"synthetic":True}],analysis=None,redacted_ready=False)
     elif action=="analyze_contract":
+        if d.get("has_real_uploads"):
+            from .document_routes import local_analysis,require_native
+            require_native(s,user,entity)
+            did=(d.get("analysis") or {}).get("document_id")
+            u=s.get(DocumentUpload,did) if did else None
+            if not u: fail("No existe extracción local disponible para esta versión",409)
+            save(s,entity,analysis=local_analysis(u,entity))
+            return entity
         if not d.get("documents"): fail("Primero adjunte un documento sintético",409)
         save(s,entity,analysis={"provider":"Claude + OCR simulados","simulated":True,"summary":f"{d['type']} entre {d['company']} y {d.get('counterparty','Contraparte ficticia')}. Revisión humana requerida.","risk":"medio","risk_level":"medio","score":67,"extracted_fields":{"amount":d["amount"],"currency":d["currency"],"end_date":d["end_date"],"country":d["country"]},"findings":[{"title":"Renovación y aviso previo","severity":"media","evidence":"Cláusula sintética 4: aviso con 60 días de anticipación.","page":2,"recommendation":"Confirmar plazo con responsable local"},{"title":"Confidencialidad","severity":"alta","evidence":"Cláusula sintética 7: anexo con información reservada.","page":3,"recommendation":"Usar copia saneada para compartir entre países"}],"analyzed_at":now(),"source_version":d["version"],"requires_human_review":True})
     elif action=="redact_document":
         write(s,user,entity,{"regional","manager","legal"})
         if not d.get("documents"): fail("Primero adjunte un documento",409)
         # Safe rendition is constructed from an allowlist; original fields never embedded.
-        save(s,entity,redacted_ready=True,redaction={"reviewed_by":user["id"],"reviewed_at":now(),"source_version":d["version"],"method":"copia reconstruida con lista permitida","removed_fields":["monto","contraparte","cuenta bancaria","identificador fiscal","condición comercial"]})
+        redaction={"reviewed_by":user["id"],"reviewed_at":now(),"source_version":d["version"],"method":"copia reconstruida con lista permitida","removed_fields":["monto","contraparte","cuenta bancaria","identificador fiscal","condición comercial"]}
+        if d.get("has_real_uploads"):
+            if p.get("review_confirmed") is not True: fail("Confirme la revisión humana del extracto que se compartirá",400)
+            redaction.update({"approved_text":text_field(p,"safe_text",limit=12000),"method":"extracto redactado y aprobado por responsable humano; no anonimización automática"})
+        save(s,entity,redacted_ready=True,redaction=redaction)
     elif action=="add_obligation":
         new(s,a.app,"obligations",contract_id=entity.id,title=text_field(p,"title"),due_date=iso_date(p.get("due_date")),country=d["country"],owner_id=d["owner_id"],owner=p.get("owner",user["name"]),status="pendiente")
     elif action=="add_amendment":
@@ -429,7 +490,7 @@ def actions(a:Action,s:Session=Depends(session),user=Depends(viewer)):
 @app.get("/api/export")
 def export(app:Literal["prospectador","contratos"],s:Session=Depends(session),user=Depends(viewer)):
     kind="contacts" if app=="prospectador" else "contracts"
-    rows=[r.data for r in records(s,app,kind) if allowed(s,user,r)]
+    rows=[r.data for r in records(s,app,kind) if allowed(s,user,r) and (app!="contratos" or user["role"]=="regional" or r.data["country"]==user["country"])]
     fields=["id","name","email","company_name","country","status","owner_id"] if kind=="contacts" else ["id","reference","title","company","country","type","status","amount","currency","end_date"]
     buf=io.StringIO(); buf.write("\ufeff"); writer=csv.DictWriter(buf,fieldnames=fields,extrasaction="ignore"); writer.writeheader()
     # Spreadsheet formula injection is neutralized even for user-created fields.
@@ -442,13 +503,28 @@ def document(cid:str,redacted:bool=True,s:Session=Depends(session),user=Depends(
     r=get(s,"contratos","contracts",cid); read(s,user,r); d=r.data
     if redacted:
         if not d.get("redacted_ready"): fail("Genere y revise primero la copia saneada",409)
-        parts=["COPIA SANEADA · DOCUMENTO SINTÉTICO",f"Referencia: {d['reference']}",f"País: {d['country']}",f"Tipo: {d['type']}","Objeto: colaboración comercial y antecedentes de experiencia.","Las condiciones comerciales e identificadores personales fueron retirados.","Uso demostrativo. Revisión humana registrada. No constituye un documento legal."]
+        if d.get("has_real_uploads"):
+            parts=["EXTRACTO SANEADO · REVISIÓN HUMANA",f"Referencia: {d['reference']}",f"País: {d['country']}",(d.get("redaction") or {}).get("approved_text",""),"Contenido seleccionado y autorizado por el responsable. No corresponde al original completo ni a anonimización automática."]
+        else:
+            parts=["COPIA SANEADA · DOCUMENTO SINTÉTICO",f"Referencia: {d['reference']}",f"País: {d['country']}",f"Tipo: {d['type']}","Objeto: colaboración comercial y antecedentes de experiencia.","Las condiciones comerciales e identificadores personales fueron retirados.","Uso demostrativo. Revisión humana registrada. No constituye un documento legal."]
     else:
+        from .document_routes import require_native,original_path
+        require_native(s,user,r)
+        if d.get("has_real_uploads"):
+            did=next((doc["id"] for doc in reversed(d["documents"]) if doc.get("real")),None)
+            u=s.get(DocumentUpload,did) if did else None
+            if not u or not original_path(u).is_file(): fail("Original no disponible",404)
+            audit(s,"contratos",user,"download_real_original",r); s.commit()
+            return FileResponse(original_path(u),media_type=u.content_type,filename=u.filename,content_disposition_type="attachment",headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff","Content-Security-Policy":"sandbox; default-src 'none'"})
         parts=["ORIGINAL SINTÉTICO · DEMOSTRACIÓN",d["title"],f"Referencia: {d['reference']}",f"Partes: {d['company']} y {d.get('counterparty','Contraparte ficticia')}",f"Monto confidencial: {d['amount']} {d['currency']}","Cuenta bancaria: DEMO-IBAN-99887766", "Identificador fiscal: DEMO-TAX-11223344","Condición comercial reservada: descuento privado del 17%",f"Vencimiento: {d['end_date']}","Cláusula 4: aviso previo con 60 días de anticipación.","Cláusula 7: confidencialidad de anexos y precios.","No corresponde a un documento real ni a una firma legal."]
-    rendered='<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Documento sintético</title><body><main>'+''.join(f"<p>{html.escape(str(p))}</p>" for p in parts)+"</main></body></html>"
+    title="Extracto aprobado" if d.get("has_real_uploads") else "Documento sintético"
+    rendered='<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+title+'</title><body><main>'+''.join(f"<p>{html.escape(str(p))}</p>" for p in parts)+"</main></body></html>"
     audit(s,"contratos",user,"download_redacted" if redacted else "download_original",r)
     s.commit()
     return HTMLResponse(rendered,headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff","Content-Security-Policy":"default-src 'none'; style-src 'none'; frame-ancestors 'self'","Content-Disposition":f'inline; filename="{cid}-{"saneado" if redacted else "original"}.html"'})
+
+from .document_routes import install_upload_routes
+install_upload_routes(app)
 
 @app.get("/propuestas/{filename}",include_in_schema=False)
 def proposal_file(filename:str):

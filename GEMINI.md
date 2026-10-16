@@ -2,5 +2,7 @@
 
 Lee AGENTS.md, docs/BRIEF.md, docs/API_CONTRACT.md y docs/coordination/gemini.md. Las dos interfaces ya están implementadas por Codex y publicadas en https://iniciativasvertia.somosmoai.tech. Tu tarea vigente es una revisión independiente de experiencia, procesos, integración y coherencia de alcance, registrando evidencia real. El encargo inicial de construcción en docs/tasks/GEMINI_FRONTEND.md queda como referencia del diseño esperado, no como instrucción para reconstruir lo existente.
 
-Tu alcance es frontend/ y docs/coordination/gemini.md. No editar backend, presupuestos ni infraestructura. Registra y coordina los cambios antes de sobrescribir trabajo concurrente. No presentar datos simulados como integraciones productivas ni atribuir pruebas no ejecutadas. El coordinador integra, publica y realiza los commits.
+Tu revisión inicial está registrada como completada en docs/coordination/gemini.md. El nuevo encargo del usuario está en docs/coordination/ENCARGO_EXPERIENCIA_V2.md: presentación previa de proyectos, animaciones explicativas, modelo supuesto y carga/lectura real de archivos. Revisa la nueva versión cuando esté compilada; registra sus hallazgos por separado en docs/coordination/gemini-experiencia-v2.md. Coordina antes de editar: Codex trabaja en PresentationHub y los espacios de perfilamiento/documentos; Claude Code aporta narrativa y modelos.
+
+Tu alcance es frontend/ y docs/coordination/gemini-experiencia-v2.md. No editar backend, presupuestos ni infraestructura. Registra y coordina los cambios antes de sobrescribir trabajo concurrente. No presentar datos simulados como integraciones productivas ni atribuir pruebas no ejecutadas. El coordinador integra, publica y realiza los commits.
 

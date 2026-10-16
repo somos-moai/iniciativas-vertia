@@ -18,7 +18,10 @@ REMOTE = '/home/moai/iniciativas-vertia'
 parser = argparse.ArgumentParser()
 parser.add_argument('--publish', action='store_true', help='Install NEW service/site after tests pass')
 parser.add_argument('--tls', action='store_true', help='Provision certificate for verified demo hostname')
+parser.add_argument('--private', action='store_true', help='Activate prepared HTTP Basic authentication for real uploads')
 args = parser.parse_args()
+if args.private and not args.publish:
+    parser.error('--private requires --publish')
 client = paramiko.SSHClient()
 client.load_system_host_keys()
 client.set_missing_host_key_policy(paramiko.RejectPolicy())
@@ -54,7 +57,7 @@ def run(command, timeout=180):
 
 for relative in ['backend', 'frontend/dist', 'deliverables']:
     tree(relative)
-for name in ['iniciativas-vertia.service','nginx-demo.conf']:
+for name in ['iniciativas-vertia.service','nginx-demo.conf','activate-private-access.py']:
     mkdir(REMOTE+'/infra')
     sftp.put(str(ROOT/'infra'/name), REMOTE+'/infra/'+name)
 sftp.close()
@@ -62,11 +65,14 @@ sftp.close()
 run(f"sed -i 's|^PROPOSALS_DIR=.*|PROPOSALS_DIR={REMOTE}/deliverables|' {REMOTE}/.env; chmod 600 {REMOTE}/.env; chown -R moai:moai {REMOTE}/backend {REMOTE}/infra {REMOTE}/frontend {REMOTE}/deliverables; sudo -u moai {REMOTE}/.venv/bin/pip install -q -r {REMOTE}/backend/requirements.txt", 240)
 run(f"cd {REMOTE} && set -a && . ./.env && set +a && export TEST_DATABASE_URL=\"$DATABASE_URL\" && sudo -u moai --preserve-env=DATABASE_URL,TEST_DATABASE_URL {REMOTE}/.venv/bin/python -m pytest backend/tests -q", 180)
 if args.publish:
+    if args.private:
+        # Protect existing site before starting a version that accepts uploads.
+        run(f'python3 {REMOTE}/infra/activate-private-access.py && nginx -t && systemctl reload nginx')
     # Pre-existing matching files are updated only for this project's service.
     run(f'install -m 644 {REMOTE}/infra/iniciativas-vertia.service /etc/systemd/system/iniciativas-vertia.service && systemctl daemon-reload && systemctl enable --now iniciativas-vertia && systemctl restart iniciativas-vertia')
-    run('sleep 2; curl --fail --silent http://127.0.0.1:8788/api/health')
+    run('curl --fail --silent --retry 12 --retry-connrefused --retry-delay 1 http://127.0.0.1:8788/api/health')
     # Preserve TLS configuration inserted by certbot on subsequent deployments.
-    run(f'test -f /etc/nginx/sites-available/iniciativas-vertia || install -m 644 {REMOTE}/infra/nginx-demo.conf /etc/nginx/sites-available/iniciativas-vertia; test -L /etc/nginx/sites-enabled/iniciativas-vertia || ln -s /etc/nginx/sites-available/iniciativas-vertia /etc/nginx/sites-enabled/iniciativas-vertia; nginx -t && systemctl reload nginx')
+    run(f"test -f /etc/nginx/sites-available/iniciativas-vertia || install -m 644 {REMOTE}/infra/nginx-demo.conf /etc/nginx/sites-available/iniciativas-vertia; sed -i -E 's/client_max_body_size[[:space:]]+[0-9]+m;/client_max_body_size 16m;/; s/proxy_read_timeout[[:space:]]+[0-9]+s;/proxy_read_timeout 120s;/' /etc/nginx/sites-available/iniciativas-vertia; test -L /etc/nginx/sites-enabled/iniciativas-vertia || ln -s /etc/nginx/sites-available/iniciativas-vertia /etc/nginx/sites-enabled/iniciativas-vertia; nginx -t && systemctl reload nginx")
     if args.tls:
         run('certbot --nginx -d iniciativasvertia.somosmoai.tech --non-interactive --agree-tos --register-unsafely-without-email --redirect', 180)
 client.close()

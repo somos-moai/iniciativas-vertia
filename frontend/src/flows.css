@@ -1,0 +1,93 @@
+/* Flujo completo y modelo de datos simulado. Usa los tokens de tema de styles.css. */
+.fx{--fx-text:#24394b;--fx-muted:#5b6e7f;--fx-line:#dfe6ec;--fx-soft:#f4f7fa;color:var(--fx-text)}
+.fx code{font-family:'JetBrains Mono',Consolas,monospace;font-size:13px;background:var(--fx-soft);border:1px solid var(--fx-line);border-radius:5px;padding:3px 7px;color:var(--ink);white-space:nowrap}
+
+.fx-tabs{display:flex;gap:10px;margin:0 0 24px;flex-wrap:wrap}
+.fx-tabs button{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border:1px solid var(--fx-line);background:#fff;border-radius:9px;font-size:16px;font-weight:600;color:var(--fx-muted);cursor:pointer;transition:border-color .15s,color .15s,box-shadow .15s}
+.fx-tabs button span{font-size:13px;font-weight:500;color:var(--fx-muted);background:var(--fx-soft);border-radius:20px;padding:3px 10px}
+.fx-tabs button:hover{border-color:#c4d0da;color:var(--ink)}
+.fx-tabs button.active{border-color:var(--navy);color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
+
+.fx-layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
+.fx-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.fx-step{display:grid;grid-template-columns:48px minmax(0,1fr);gap:14px;position:relative}
+.fx-step:not(:last-child)::before{content:'';position:absolute;left:23px;top:48px;bottom:-14px;width:2px;background:var(--fx-line)}
+.fx-step-marker span{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:16px;position:relative;z-index:1}
+.fx-step-card{background:#fff;border:1px solid var(--fx-line);border-radius:12px;padding:20px 22px}
+.fx-step-card header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.fx-step-card h3{font-size:19px;line-height:1.3;color:var(--ink);margin:0}
+.fx-step-card header p{font-size:15px;line-height:1.5;color:var(--fx-muted);margin:4px 0 0}
+.fx-tag{font-size:13px;font-weight:600;border-radius:6px;padding:5px 10px;white-space:nowrap}
+.fx-tag-sim{background:#fff5e6;color:#8a5a12;border:1px solid #f3dfbd}
+.fx-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:16px 0 0}
+.fx-grid dt{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--fx-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.fx-grid dd{margin:0;display:flex;flex-wrap:wrap;gap:6px}
+.fx-chip{display:inline-flex;align-items:center;font-size:14px;line-height:1.3;padding:5px 10px;border-radius:20px;background:var(--fx-soft);border:1px solid var(--fx-line);color:var(--fx-text)}
+.fx-chip-link{cursor:pointer;color:var(--ink);font-weight:600;font-family:inherit}
+.fx-chip-link:hover{border-color:var(--navy)}
+.fx-rule{display:flex;gap:9px;align-items:flex-start;margin:16px 0 0;padding:12px 14px;background:var(--fx-soft);border-radius:8px;font-size:15px;line-height:1.55;color:var(--fx-text)}
+.fx-rule svg{flex:none;margin-top:3px;color:var(--navy)}
+.fx-step-card footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.fx-live{font-size:14px;font-weight:600;color:var(--ink);background:#eef4f9;border-radius:6px;padding:6px 10px}
+.fx-go{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--navy);background:none;border:0;padding:6px 0;cursor:pointer;font-family:inherit}
+.fx-go:hover{text-decoration:underline}
+
+.fx-side{display:flex;flex-direction:column;gap:16px;position:sticky;top:90px}
+.fx-box{background:#fff;border:1px solid var(--fx-line);border-radius:12px;padding:20px 22px}
+.fx-box h3{display:flex;align-items:center;gap:8px;font-size:18px;color:var(--ink);margin:0 0 6px}
+.fx-box>p{font-size:15px;line-height:1.55;color:var(--fx-muted);margin:0 0 14px}
+.fx-funnel{display:flex;flex-direction:column;gap:12px}
+.fx-funnel-label{display:flex;justify-content:space-between;font-size:15px;margin-bottom:5px}
+.fx-funnel-label b{color:var(--ink)}
+.fx-bar{height:10px;background:var(--fx-soft);border-radius:6px;overflow:hidden}
+.fx-bar i{display:block;height:100%;background:var(--navy);border-radius:6px;transition:width .3s}
+.fx-inline{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.fx-list{margin:6px 0 10px;padding-left:20px;font-size:15px;line-height:1.55;color:var(--fx-text)}
+.fx-list li{margin:6px 0}
+
+.fx-callout{display:flex;gap:14px;align-items:flex-start;background:#eef4f9;border:1px solid #d6e3ee;border-radius:12px;padding:18px 20px;margin-bottom:18px;color:var(--fx-text)}
+.fx-callout svg{flex:none;color:var(--navy);margin-top:2px}
+.fx-callout b{font-size:16px;color:var(--ink)}
+.fx-callout p{font-size:15px;line-height:1.6;margin:6px 0 0}
+.fx-hint{font-size:15px;color:var(--fx-muted);margin:0 0 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.fx-hint button{font-size:14px;font-weight:600;color:var(--navy);background:none;border:1px solid var(--fx-line);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit}
+.fx-entities{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.fx-entity{background:#fff;border:1px solid var(--fx-line);border-radius:12px;padding:18px 18px 12px;cursor:pointer;transition:opacity .15s,border-color .15s,box-shadow .15s;outline:none}
+.fx-entity:hover,.fx-entity:focus-visible{border-color:#b7c5d1}
+.fx-entity.is-focus{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy)}
+.fx-entity.is-related{border-color:var(--navy)}
+.fx-entity.is-dim{opacity:.38}
+.fx-entity header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.fx-entity h3{font-size:18px;color:var(--ink);margin:0}
+.fx-entity header small{font-family:'JetBrains Mono',Consolas,monospace;font-size:13px;color:var(--fx-muted)}
+.fx-count{min-width:36px;text-align:center;font-size:15px;font-weight:700;background:var(--navy);color:#fff;border-radius:20px;padding:4px 10px}
+.fx-note{font-size:14px;line-height:1.5;color:var(--fx-muted);margin:8px 0 0}
+.fx-fields{list-style:none;margin:12px 0 0;padding:0}
+.fx-fields li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid #edf1f4;font-size:14px;line-height:1.4}
+.fx-field-name{font-family:'JetBrains Mono',Consolas,monospace;font-size:13.5px;color:var(--ink);display:flex;align-items:center;gap:6px;flex:none;max-width:60%}
+.fx-field-type{color:var(--fx-muted);text-align:right}
+.fx-key{font-style:normal;font-family:inherit;font-size:11px;font-weight:700;border-radius:4px;padding:2px 5px;background:var(--navy);color:#fff}
+.fx-fk{background:#e7eef5;color:var(--ink)}
+.fx-relations{margin-top:20px}
+.fx-table-wrap{overflow-x:auto;margin-top:10px}
+.fx-relations table{width:100%;border-collapse:collapse;font-size:15px}
+.fx-relations th{text-align:left;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--fx-muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--fx-line)}
+.fx-relations td{padding:12px;border-bottom:1px solid #edf1f4;vertical-align:top;line-height:1.5}
+.fx-relations tr.is-focus td{background:#eef4f9}
+.fx-relations td button{font-size:15px;font-weight:600;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;font-family:inherit;text-align:left}
+.fx-relations td button:hover{text-decoration:underline}
+.fx-card{font-family:'JetBrains Mono',Consolas,monospace;font-size:13.5px;white-space:nowrap;background:var(--fx-soft);border-radius:5px;padding:3px 8px}
+.fx-foot{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--fx-muted);margin:24px 0 0}
+
+@media(max-width:1200px){.fx-layout{grid-template-columns:1fr}.fx-side{position:static}}
+@media(max-width:760px){
+  .fx-grid{grid-template-columns:1fr}
+  .fx-step{grid-template-columns:36px minmax(0,1fr);gap:10px}
+  .fx-step-marker span{width:36px;height:36px;font-size:14px}
+  .fx-step:not(:last-child)::before{left:17px;top:36px}
+  .fx-step-card{padding:16px}
+  .fx-step-card header{flex-direction:column}
+  .fx-tabs button{width:100%;justify-content:flex-start}
+  .fx-entities{grid-template-columns:1fr}
+  .fx-relations td,.fx-relations th{padding:10px 8px}
+}
