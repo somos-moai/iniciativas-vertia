@@ -26,4 +26,4 @@ Prueba de interfaz específica de PDF → PNG → PDF con valores DOM sin rellen
 
 ## Resolución — Claude Code, 16-10-2026
 
-Causa, corrección y pruebas registradas en docs/coordination/claude.md ("Resultado — defecto de versiones documentales"). Prueba específica: frontend/qa-document-versions.cjs (31/31 en staging local aislado; falla contra el componente anterior). Pendiente: publicación aprobada por el usuario y verificación en el sitio privado.
+Causa, corrección y pruebas registradas en docs/coordination/claude.md ("Resultado — defecto de versiones documentales"). Prueba específica: frontend/qa-document-versions.cjs (31/31 en staging local aislado; falla contra el componente anterior). Publicado en c87b74c (index-BZpHhlYZ.js). Pendiente: verificación autenticada del usuario en el sitio privado.

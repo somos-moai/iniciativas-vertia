@@ -99,3 +99,11 @@ Fuente de publicación: repositorio `somos-moai/iniciativas-vertia`, árbol de t
 | `deliverables/contratos.pdf` | `a065814c49f24632e4cc78a0ffb19f67d4f99dfb88ad34d8e22a76925f033259` |
 | `frontend/dist/samples/contrato_servicios_demostracion.pdf` | `873c34066a47422f9f0f6f22b79ec1bcf7b15973f6152230e923d4a33451f350` |
 | `frontend/dist/samples/contrato_imagen_demostracion.png` | `afb096519d6d2167f63a8289ec6a1103174b96fe8b3b3844cf5ecdc9c61a46ee` |
+
+## Publicación c87b74c — 16-10-2026 (Claude Code)
+
+Aprobada por el usuario. `python infra/deploy-demo.py --publish --private` desde commit c87b74c (rama main). Pruebas en el VPS antes de publicar: 15/15 en 5,61 s. Acceso privado reactivado antes de reiniciar; `nginx -t` correcto (avisos OCSP de certificados de otros sitios, preexistentes); salud local `{"status":"ok","database":"postgresql","mode":"synthetic"}`. Sin cambios de esquema; no se tocaron servicios ni bases ajenas.
+
+Comprobación sin credenciales: 401 anónimo en `/`, `/contratos`, `/prospectador`, `/api/health`, `/api/state`, `/propuestas/contratos.pdf` y `/samples/...`. Servicio `active`. `index.html` publica `index-BZpHhlYZ.js` / `index-CTvZoLKH.css`; hash del JS y de `backend/document_worker.py` idénticos a los locales. `/api/document-capabilities` en loopback: `ocr_available:false`, `scan_mode:simulado_por_nombre_de_archivo`.
+
+Pendiente: verificación autenticada del usuario (PDF → PNG → PDF en el sitio privado). La prueba `frontend/qa-document-versions.cjs` escribe datos y no debe apuntarse a producción.

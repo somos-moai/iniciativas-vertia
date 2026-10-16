@@ -120,7 +120,7 @@ Estado: terminado 15-10-2026 ~22:15. Archivos liberados.
 ## Trabajo en curso — Claude, 15-10-2026 23:35: defecto de versiones y escaneo simulado
 
 Por instrucción del usuario: la lectura de imágenes deja de usar OCR y pasa a ser un escaneo simulado que identifica el documento por el nombre del archivo, rotulado como simulado. El texto nativo de PDF se mantiene. Además se corrige el defecto PDF → PNG → PDF de campos vacíos. Archivos: backend/document_worker.py, backend/document_routes.py, backend/main.py (rótulo de integración), backend/tests/test_real_documents.py, frontend/src/DocumentWorkspace.jsx y textos relacionados. Pruebas en un PostgreSQL desechable local (puerto 5433), nunca contra producción.
-Estado: terminado 16-10-2026 ~00:30 (código y pruebas locales). Publicación pendiente de aprobación del usuario.
+Estado: terminado y publicado (commit c87b74c, 16-10-2026).
 
 ### Resultado — defecto de versiones documentales
 
@@ -141,3 +141,11 @@ Pruebas (staging local aislado: PostgreSQL 17 desechable en 127.0.0.1:5433, API 
 - Build: node frontend/build-local.cjs → index-BZpHhlYZ.js / index-CTvZoLKH.css.
 
 No publicado aún. Pendiente: aprobación del usuario para desplegar con infra/deploy-demo.py --publish --private, commit y push; revisión de Gemini en Antigravity.
+
+## Publicación c87b74c — 16-10-2026 (Claude Code)
+
+Aprobada por el usuario. `python infra/deploy-demo.py --publish --private` desde commit c87b74c (rama main). Pruebas en el VPS antes de publicar: 15/15 en 5,61 s. Acceso privado reactivado antes de reiniciar; `nginx -t` correcto (avisos OCSP de certificados de otros sitios, preexistentes); salud local `{"status":"ok","database":"postgresql","mode":"synthetic"}`. Sin cambios de esquema; no se tocaron servicios ni bases ajenas.
+
+Comprobación sin credenciales: 401 anónimo en `/`, `/contratos`, `/prospectador`, `/api/health`, `/api/state`, `/propuestas/contratos.pdf` y `/samples/...`. Servicio `active`. `index.html` publica `index-BZpHhlYZ.js` / `index-CTvZoLKH.css`; hash del JS y de `backend/document_worker.py` idénticos a los locales. `/api/document-capabilities` en loopback: `ocr_available:false`, `scan_mode:simulado_por_nombre_de_archivo`.
+
+Pendiente: verificación autenticada del usuario (PDF → PNG → PDF en el sitio privado). La prueba `frontend/qa-document-versions.cjs` escribe datos y no debe apuntarse a producción.
