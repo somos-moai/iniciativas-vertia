@@ -42,7 +42,7 @@ node frontend/qa-workspaces-extra.cjs
 node frontend/qa-summary.cjs
 ```
 
-Los primeros dos comandos verifican ICP, fuentes y faltantes, cambios de perfil, selección de cuentas y responsables, campaña con criterios conservados, cargas PDF/imagen, OCR real, revisión humana, extracto autorizado, aislamiento del original entre países, conservación de formularios frente a errores 400 y vistas móviles. El tercer comando consolida el informe. Las pruebas usan documentos sintéticos y no consumen proveedores externos.
+Los primeros dos comandos verifican ICP, fuentes y faltantes, cambios de perfil, selección de cuentas y responsables, campaña con criterios conservados, cargas PDF/imagen, escaneo simulado de imágenes por nombre de archivo, revisión humana, extracto autorizado, aislamiento del original entre países, conservación de formularios frente a errores 400 y vistas móviles. El tercer comando consolida el informe. Las pruebas usan documentos sintéticos y no consumen proveedores externos.
 
 Resultados y capturas: `artifacts/qa/workspaces/`. Informe legible: `docs/coordination/qa-workspaces.md`. Se aprobaron 38 comprobaciones para la entrega actual.
 

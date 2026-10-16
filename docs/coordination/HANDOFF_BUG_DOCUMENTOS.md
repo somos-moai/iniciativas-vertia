@@ -23,3 +23,7 @@ El usuario pidió handoff durante la investigación. Los subagentes frontend/bac
 ## Cierre requerido
 
 Prueba de interfaz específica de PDF → PNG → PDF con valores DOM sin rellenarlos en el test; repetir tras recargar, comprobar evidencias y páginas correctas, preservar edición ante errores y mantener el rechazo de revisión obsoleta. Compilar y publicar solo después de verificar el caso, registrando hashes y resultado. El build actualmente publicado conserva este defecto: VONnwKLm.js / CTvZoLKH.css.
+
+## Resolución — Claude Code, 16-10-2026
+
+Causa, corrección y pruebas registradas en docs/coordination/claude.md ("Resultado — defecto de versiones documentales"). Prueba específica: frontend/qa-document-versions.cjs (31/31 en staging local aislado; falla contra el componente anterior). Pendiente: publicación aprobada por el usuario y verificación en el sitio privado.

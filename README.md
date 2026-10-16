@@ -16,7 +16,7 @@ Continuación solicitada por el usuario: [handoff para Claude Code y Gemini](HAN
 
 La portada explica primero ambos proyectos, sus recorridos animados y explorables, los modelos de datos propuestos y el roadmap regional. Después ofrece acceso a las aplicaciones. Los perfiles seleccionables permiten revisar permisos; ese selector no es autenticación productiva.
 
-El catálogo inicial usa datos ficticios persistentes en PostgreSQL. El perfilamiento comercial guarda criterios y evidencia con resultados explicables. La carga de PDF e imágenes, su extracción de texto, OCR local y confirmación humana son reales. Claude API, correo, firmas, prospectos y POST permanecen simulados; no existen firmas legales ni mensajes enviados a terceros. La lectura local no realiza una evaluación jurídica con IA.
+El catálogo inicial usa datos ficticios persistentes en PostgreSQL. El perfilamiento comercial guarda criterios y evidencia con resultados explicables. La carga de PDF e imágenes, la extracción de texto de los PDF y la confirmación humana son reales; las imágenes usan un escaneo simulado que identifica el documento por el nombre del archivo. Claude API, correo, firmas, prospectos y POST permanecen simulados; no existen firmas legales ni mensajes enviados a terceros. La lectura local no realiza una evaluación jurídica con IA.
 
 El sitio se protege antes de habilitar cargas reales. Las credenciales se entregan en un archivo privado fuera del repositorio. Nunca guardar claves ni documentos de los usuarios en Git. Ver `docs/API_UPLOADS.md` para límites, versiones, evidencia y permisos de lectura.
 

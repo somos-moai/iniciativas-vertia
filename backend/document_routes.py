@@ -63,7 +63,8 @@ def public_document(upload):
 def local_analysis(upload,contract):
     result=upload.extraction
     pages=[{k:p.get(k) for k in ["page","method","chars","confidence"]} for p in result.get("pages",[])]
-    return {"provider":"Lectura local + OCR Tesseract","mode":"local_extraction","simulated":False,"ai_connected":False,"ai_status":"Claude no conectado; lectura y reglas locales, sin interpretación jurídica por IA","document_id":upload.id,"summary":f"Se leyeron {len(pages)} páginas y {result.get('text_characters',0)} caracteres del archivo aportado. Se proponen {len(result.get('proposed_fields',[]))} campos mediante reglas locales; requieren revisión humana.","text_preview":"\n\n".join(p.get("text","") for p in result.get("pages",[]))[:4000],"pages":pages,"proposed_fields":result.get("proposed_fields",[]),"findings":[],"risk":"no_evaluado","risk_level":"no_evaluado","score":None,"warnings":result.get("warnings",[]),"source_version":upload.version,"analyzed_at":result.get("processed_at"),"requires_human_review":result.get("review_status")!="reviewed","review_status":result.get("review_status","pending"),"reviewed_fields":result.get("reviewed_fields",{}),"reviewed_by":result.get("reviewed_by"),"reviewed_at":result.get("reviewed_at")}
+    simulated_scan=any(p.get("method")=="escaneo_simulado" for p in result.get("pages",[]))
+    return {"provider":"Texto PDF + escaneo simulado por nombre de archivo" if simulated_scan else "Lectura local del texto PDF","scan_simulated":simulated_scan,"mode":"local_extraction","simulated":False,"ai_connected":False,"ai_status":"Claude no conectado; lectura y reglas locales, sin interpretación jurídica por IA","document_id":upload.id,"summary":f"Se leyeron {len(pages)} páginas y {result.get('text_characters',0)} caracteres del archivo aportado. Se proponen {len(result.get('proposed_fields',[]))} campos mediante reglas locales; requieren revisión humana.","text_preview":"\n\n".join(p.get("text","") for p in result.get("pages",[]))[:4000],"pages":pages,"proposed_fields":result.get("proposed_fields",[]),"findings":[],"risk":"no_evaluado","risk_level":"no_evaluado","score":None,"warnings":result.get("warnings",[]),"source_version":upload.version,"analyzed_at":result.get("processed_at"),"requires_human_review":result.get("review_status")!="reviewed","review_status":result.get("review_status","pending"),"reviewed_fields":result.get("reviewed_fields",{}),"reviewed_by":result.get("reviewed_by"),"reviewed_at":result.get("reviewed_at")}
 
 def review_extraction(s,user,contract,payload):
     from . import main as api
@@ -100,13 +101,9 @@ def install_upload_routes(app):
     @app.get("/api/document-capabilities")
     def capabilities(user=Depends(api.viewer)):
         ready=bool(os.environ.get("UPLOAD_DIR"))
-        binary=shutil.which("tesseract"); languages=[]
-        if binary:
-            try:
-                result=subprocess.run([binary,"--list-langs"],capture_output=True,text=True,timeout=3)
-                languages=[lang for lang in result.stdout.splitlines() if lang in {"spa","eng"}]
-            except Exception: pass
-        return {"real_uploads":ready,"max_bytes":MAX_BYTES,"max_pages":MAX_PAGES,"max_pixels":20_000_000,"timeout_seconds":WORKER_SECONDS,"concurrency":1,"supported_types":["application/pdf","image/png","image/jpeg","image/webp"],"ocr_available":bool(binary and set(languages)=={"spa","eng"}),"ocr_languages":languages,"claude_connected":False,"mode":"local_extraction"}
+        # Demostración: las imágenes se identifican por nombre de archivo (escaneo simulado), sin OCR.
+        languages=[]
+        return {"real_uploads":ready,"max_bytes":MAX_BYTES,"max_pages":MAX_PAGES,"max_pixels":20_000_000,"timeout_seconds":WORKER_SECONDS,"concurrency":1,"supported_types":["application/pdf","image/png","image/jpeg","image/webp"],"ocr_available":False,"scan_mode":"simulado_por_nombre_de_archivo","ocr_languages":languages,"claude_connected":False,"mode":"local_extraction"}
 
     @app.post("/api/contracts/{cid}/uploads")
     @app.post("/api/contracts/{cid}/upload",include_in_schema=False)
@@ -141,7 +138,7 @@ def install_upload_routes(app):
             worker_env={key:value for key,value in os.environ.items() if key.upper() in {"PATH","LANG","LC_ALL","HOME","SYSTEMROOT","WINDIR","TEMP","TMP","APPDATA","LOCALAPPDATA","USERPROFILE","TESSDATA_PREFIX"}}
             worker_env.update({"OMP_THREAD_LIMIT":"1","PYTHONIOENCODING":"utf-8"})
             try:
-                worker=subprocess.run([sys.executable,"-m","backend.document_worker",str(path),str(folder),mime],capture_output=True,text=True,encoding="utf-8",timeout=WORKER_SECONDS,cwd=Path(__file__).resolve().parents[1],env=worker_env)
+                worker=subprocess.run([sys.executable,"-m","backend.document_worker",str(path),str(folder),mime,name],capture_output=True,text=True,encoding="utf-8",timeout=WORKER_SECONDS,cwd=Path(__file__).resolve().parents[1],env=worker_env)
             except subprocess.TimeoutExpired: raise HTTPException(422,"La lectura superó 90 segundos. Divida el documento o use una copia más legible.")
             try: result=json.loads(worker.stdout)
             except Exception: raise HTTPException(422,"El lector no pudo procesar el documento; pruebe una copia válida y más pequeña")

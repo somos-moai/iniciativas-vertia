@@ -87,7 +87,7 @@ La selección de cuenta acompaña al contacto y a la campaña. El aprobador pued
 
 ## Lectura de archivos y confirmación humana
 
-Se admiten PDF, PNG, JPEG y WebP de hasta 15 MiB; los PDF se limitan a 40 páginas. La aplicación conserva el archivo, genera previews y muestra texto por página. Utiliza extracción nativa para PDF con texto y OCR local en las páginas escaneadas e imágenes. Si la calidad impide reconocer texto, se informa sin inventar campos.
+Se admiten PDF, PNG, JPEG y WebP de hasta 15 MiB; los PDF se limitan a 40 páginas. La aplicación conserva el archivo, genera previews y muestra texto por página. Utiliza extracción nativa para PDF con texto; las imágenes y páginas escaneadas usan en la demostración un escaneo simulado que identifica el documento por el nombre del archivo. El OCR real corresponde a la implementación productiva. Si la calidad impide reconocer texto, se informa sin inventar campos.
 
 Las propuestas de contraparte, tipo, monto, moneda y fechas incluyen evidencia cuando una regla encuentra un patrón explícito. La persona puede editar el valor y seleccionar qué campos confirma. La lectura no calcula riesgo jurídico ni reemplaza a Claude API. Una versión nueva revoca el análisis anterior y el extracto compartible.
 

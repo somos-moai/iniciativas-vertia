@@ -188,8 +188,8 @@ def integrations(application):
     names=[("PostgreSQL","conectado","Persistencia real de demostración")]
     names += [(n,"simulado","Sin conexión ni consumos externos") for n in (["Lusha","Microsoft 365","Claude","POST"] if application=="prospectador" else ["Claude","Firma electrónica"])]
     if application=="contratos":
-        names.append(("OCR local","conectado" if shutil.which("tesseract") else "no_disponible","Lectura PDF real y OCR Tesseract local; no consume API externa"))
-    return [{"id":n.lower().replace(" ","-"),"name":n,"status":st,"description":desc,"mode":"postgresql" if n=="PostgreSQL" else "local_extraction" if n=="OCR local" else "synthetic"} for n,st,desc in names]
+        names.append(("Lectura de archivos","conectado","Texto real de PDF; las imágenes se identifican por nombre de archivo (escaneo simulado)"))
+    return [{"id":n.lower().replace(" ","-"),"name":n,"status":st,"description":desc,"mode":"postgresql" if n=="PostgreSQL" else "local_extraction" if n=="Lectura de archivos" else "synthetic"} for n,st,desc in names]
 
 def state(s,user,application):
     if application not in APPS:

@@ -12,31 +12,38 @@ from pathlib import Path
 MAX_PAGES=40
 MAX_PIXELS=20_000_000
 
-def ocr(image,folder,index):
-    binary=shutil.which("tesseract")
-    if not binary:
-        raise ValueError("OCR no disponible: Tesseract no está instalado en el servidor")
-    path=folder/f"ocr-{index}.png"
-    image.save(path,"PNG")
-    try:
-        result=subprocess.run([binary,str(path),"stdout","-l","spa+eng","--psm","3","tsv"],capture_output=True,text=True,encoding="utf-8",timeout=20,env={**os.environ,"OMP_THREAD_LIMIT":"1"})
-        if result.returncode:
-            raise ValueError("OCR no pudo procesar la página; verificar idiomas spa+eng y calidad de imagen")
-        lines={}; confidences=[]
-        for row in csv.DictReader(io.StringIO(result.stdout),delimiter="\t"):
-            word=(row.get("text") or "").strip()
-            if not word: continue
-            key=tuple(row.get(k) for k in ["page_num","block_num","par_num","line_num"])
-            lines.setdefault(key,[]).append(word)
-            try:
-                confidence=float(row.get("conf","-1"))
-                if confidence>=0: confidences.append(confidence/100)
-            except ValueError: pass
-        return "\n".join(" ".join(words) for words in lines.values()),round(sum(confidences)/len(confidences),3) if confidences else None
-    except subprocess.TimeoutExpired:
-        raise ValueError("OCR excedió 20 segundos en una página; pruebe una imagen más clara o menos páginas")
-    finally:
-        path.unlink(missing_ok=True)
+# Escaneo simulado: la demostración no ejecuta OCR. Una imagen, o una página PDF sin texto
+# nativo, se identifica por el nombre del archivo. No se inventan montos, partes ni fechas
+# para archivos desconocidos; solo los ejemplos publicados tienen contenido conocido.
+SIMULATED_METHOD="escaneo_simulado"
+SAMPLE_FIRST_PAGE="""Contrato de servicios publicitarios
+País: Chile
+Sociedad: Vertia Chile Demo SpA (entidad ficticia)
+Contraparte: Faro Retail SpA (entidad ficticia)
+Tipo de contrato: Servicios
+Monto total: USD 12.500,00
+Moneda: USD
+Fecha de inicio: 2026-10-01
+Fecha de término: 2027-12-31
+Responsable del expediente: Área Comercial Demo"""
+KNOWN_SCANS={"contrato_imagen_demostracion":SAMPLE_FIRST_PAGE,"contrato_servicios_demostracion":SAMPLE_FIRST_PAGE}
+TYPE_HINTS=[(r"confidencialidad|(?:^|_)nda(?:_|$)|no_?divulgacion","Acuerdo de confidencialidad"),(r"arrendamiento|arriendo","Contrato de arrendamiento"),(r"servicio","Contrato de servicios"),(r"concesion","Contrato de concesión"),(r"publicidad|comercial","Contrato comercial")]
+
+def _plain(value):
+    value=value.lower()
+    for a,b in zip("áéíóúüñ","aeiouun"): value=value.replace(a,b)
+    return value
+
+def simulated_scan(filename,page=1):
+    stem=_plain(Path(filename or "documento").stem)
+    key=re.sub(r"[^a-z0-9]+","_",stem).strip("_")
+    if page==1 and key in KNOWN_SCANS: return KNOWN_SCANS[key]
+    readable=re.sub(r"[_\-.]+"," ",Path(filename or "documento").stem).strip() or "documento"
+    lines=[f"Documento identificado por el nombre del archivo: {readable}"]
+    for pattern,phrase in TYPE_HINTS:
+        if re.search(pattern,key):
+            lines.append(f"{phrase} (según el nombre del archivo)"); break
+    return "\n".join(lines)
 
 def preview(image,folder,index):
     image=image.convert("RGB")
@@ -90,7 +97,7 @@ def proposals(pages):
                     except ValueError: pass
     return proposed[:60]
 
-def process(path,folder,mime):
+def process(path,folder,mime,source_name=""):
     from PIL import Image,ImageOps
     Image.MAX_IMAGE_PIXELS=MAX_PIXELS
     pages=[]; warnings=[]
@@ -115,7 +122,7 @@ def process(path,folder,mime):
                     if len(re.sub(r"\s","",native))>=20:
                         text=native; method="pdf_text"; confidence=None
                     else:
-                        text,confidence=ocr(image,folder,index); method="ocr_tesseract"
+                        text=simulated_scan(source_name,index); method=SIMULATED_METHOD; confidence=None
                     filename=preview(image,folder,index); image.close()
                 finally: page.close()
                 pages.append({"page":index,"text":text[:20000],"method":method,"confidence":confidence,"chars":len(text[:20000]),"preview_file":filename})
@@ -125,10 +132,11 @@ def process(path,folder,mime):
             if source.width*source.height>MAX_PIXELS: raise ValueError("Imagen demasiado grande: máximo 20 millones de píxeles")
             if getattr(source,"n_frames",1)>1: raise ValueError("No se admiten imágenes animadas o multipágina")
             image=ImageOps.exif_transpose(source).convert("RGB"); image.load(); image.info.clear()
-        text,confidence=ocr(image,folder,1)
+        text=simulated_scan(source_name,1); confidence=None
         filename=preview(image,folder,1); image.close()
-        pages.append({"page":1,"text":text[:20000],"method":"ocr_tesseract","confidence":confidence,"chars":len(text[:20000]),"preview_file":filename})
+        pages.append({"page":1,"text":text[:20000],"method":SIMULATED_METHOD,"confidence":confidence,"chars":len(text[:20000]),"preview_file":filename})
     chars=sum(p["chars"] for p in pages)
+    if any(p["method"]==SIMULATED_METHOD for p in pages): warnings.append("Escaneo simulado: la imagen se identificó por el nombre del archivo; no se ejecutó OCR sobre su contenido.")
     if not chars: warnings.append("No se pudo leer texto. El documento puede estar vacío o no ser legible; no se generaron campos ni hallazgos.")
     if sum(p["chars"] for p in pages)>200000:
         remaining=200000
@@ -143,8 +151,8 @@ def main():
             import resource
             resource.setrlimit(resource.RLIMIT_AS,(1_300_000_000,1_300_000_000))
             resource.setrlimit(resource.RLIMIT_CPU,(80,80))
-        path,folder,mime=sys.argv[1:4]
-        print(json.dumps(process(Path(path),Path(folder),mime),ensure_ascii=False))
+        path,folder,mime=sys.argv[1:4]; filename=sys.argv[4] if len(sys.argv)>4 else ""
+        print(json.dumps(process(Path(path),Path(folder),mime,filename),ensure_ascii=False))
     except Exception as e:
         message=str(e) if isinstance(e,ValueError) else "Archivo ilegible, dañado o no compatible con el lector local"
         print(json.dumps({"status":"failed","error":message[:350]},ensure_ascii=False))

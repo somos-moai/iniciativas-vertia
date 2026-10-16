@@ -1,4 +1,4 @@
-"""Real bytes, actual PostgreSQL and actual local OCR, never a simulated reading."""
+"""Real bytes and actual PostgreSQL. PDF text is read for real; images use a labelled simulated scan by filename."""
 import io
 import shutil
 from pathlib import Path
@@ -98,16 +98,22 @@ def test_real_cross_country_sanitized_only_and_new_version_revokes(client,tmp_pa
     assert second['entity']['redacted_ready'] is False
     assert client.get(f'/api/contracts/{cid}/document?redacted=true',headers=headers).status_code==409
 
-def test_real_image_ocr_no_fabricated_reading(client,tmp_path,monkeypatch):
-    if not shutil.which('tesseract'): pytest.skip('Requiere Tesseract real spa+eng; ejecutar en VPS')
+def test_image_simulated_scan_by_filename_without_fabrication(client,tmp_path,monkeypatch):
     monkeypatch.setenv('UPLOAD_DIR',str(tmp_path/'private'))
-    cid=create(client); r=upload(client,cid,real_image(),name='foto-contrato.png',mime='image/png')
-    assert r.status_code==200,r.text
-    d=r.json()['document']; result=client.get(f'/api/contracts/{cid}/uploads/{d["id"]}/text').json()
-    assert result['pages'][0]['method']=='ocr_tesseract'
-    assert 'ARRENDAMIENTO' in result['pages'][0]['text'].upper()
-    assert any(p['field']=='amount' and p['value']==18000 for p in result['proposed_fields'])
-    assert any(p['field']=='end_date' and p['value']=='2028-06-30' for p in result['proposed_fields'])
+    cid=create(client)
+    sample=upload(client,cid,real_image(),name='contrato_imagen_demostracion.png',mime='image/png')
+    assert sample.status_code==200,sample.text
+    d=sample.json()['document']; result=client.get(f'/api/contracts/{cid}/uploads/{d["id"]}/text').json()
+    assert result['pages'][0]['method']=='escaneo_simulado'
+    assert any('Escaneo simulado' in w for w in result['warnings'])
+    assert any(p['field']=='amount' and p['value']==12500 for p in result['proposed_fields'])
+    assert any(p['field']=='counterparty' and 'Faro Retail' in p['value'] for p in result['proposed_fields'])
+    assert sample.json()['entity']['analysis']['scan_simulated'] is True
+    other=upload(client,cid,real_image(),name='foto_arrendamiento_sintetico.png',mime='image/png')
+    assert other.status_code==200,other.text
+    fields=client.get(f'/api/contracts/{cid}/uploads/{other.json()["document"]["id"]}/text').json()['proposed_fields']
+    # Un archivo desconocido solo aporta el tipo inferido del nombre; nunca montos, partes ni fechas inventadas.
+    assert [(p['field'],p['value']) for p in fields]==[('type','Arrendamiento')]
 
 def test_icp_transparent_matching_and_missing_evidence(client):
     action(client,'prospectador','save_icp',payload={'target_sectors':['Retail'],'countries':['UY'],'min_employees':100,'annual_budget_min':20000,'signals':['expansión'],'persona':'Directora de Marketing'},user='executive-uy')

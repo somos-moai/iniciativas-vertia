@@ -47,7 +47,7 @@ def test_health_real_postgres_and_seed(client):
     s=state(client,"contratos")
     assert len(s["contracts"])==25
     assert len(s["countries"])==5
-    assert all(i["status"]=="simulado" for i in s["integrations"] if i["name"] not in {"PostgreSQL","OCR local"})
+    assert all(i["status"]=="simulado" for i in s["integrations"] if i["name"] not in {"PostgreSQL","Lectura de archivos"})
 
 def test_country_owner_acl_and_invalid_profile(client):
     s=state(client,"prospectador","executive-uy")

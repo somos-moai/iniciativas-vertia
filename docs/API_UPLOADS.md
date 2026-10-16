@@ -1,6 +1,6 @@
 # Lectura real de documentos y perfilamiento verificable
 
-Extensión del contrato API. Implementación local: PostgreSQL, archivos privados, pypdf, PDFium y OCR Tesseract español+inglés. **No se consume Claude ni otra API externa.** La interfaz debe distinguir el texto realmente leído de los datos sintéticos iniciales y del análisis jurídico por IA, que no está conectado.
+Extensión del contrato API. Implementación local: PostgreSQL, archivos privados, pypdf y PDFium. Sin OCR: escaneo simulado: las imágenes y páginas sin texto se identifican por el nombre del archivo, sin OCR. **No se consume Claude ni otra API externa.** La interfaz debe distinguir el texto realmente leído de los datos sintéticos iniciales y del análisis jurídico por IA, que no está conectado.
 
 ## Carga y procesamiento
 
@@ -8,8 +8,8 @@ Extensión del contrato API. Implementación local: PostgreSQL, archivos privado
 
 - PDF, PNG, JPEG y WebP; magic bytes, extensión y MIME coherentes.
 - Máximo 15 MiB, 40 páginas PDF y 20 millones de píxeles por imagen. Imágenes animadas, PDF cifrado y archivos dañados se rechazan.
-- Extracción nativa de PDF si tiene texto. Páginas escaneadas e imágenes pasan por Tesseract `spa+eng` real.
-- Un proceso de lectura simultáneo; otro intento recibe 429 y `Retry-After: 5`. Límite global 90 segundos y 20 segundos por página OCR, subproceso con límites de recursos en Linux. No inventar barras de progreso OCR: XHR puede medir transferencia; después indicar lectura en curso hasta recibir resultado.
+- Extracción nativa de PDF si tiene texto. Páginas escaneadas e imágenes usan `method:"escaneo_simulado"`: los ejemplos publicados (`contrato_imagen_demostracion`, `contrato_servicios_demostracion`) devuelven su contenido conocido; otro archivo solo aporta el tipo inferido de su nombre, nunca montos, partes ni fechas. Se agrega un aviso en `warnings` y `analysis.scan_simulated:true`.
+- Un proceso de lectura simultáneo; otro intento recibe 429 y `Retry-After: 5`. Límite global 90 segundos, subproceso con límites de recursos en Linux. No inventar barras de progreso de lectura: XHR puede medir transferencia; después indicar lectura en curso hasta recibir resultado.
 - Respuesta completa o error; un fallo no guarda una versión documental inválida ni deja archivos parciales. Texto ilegible se informa como `completed_no_text` sin propuestas inventadas.
 - Originales y previews en `UPLOAD_DIR` privado, directorio 700/archivos 600. Claves UUID internas; no devolver rutas ni claves de almacenamiento. Metadatos, páginas y extracción persisten en PostgreSQL, tabla `vertia_document_uploads`.
 
@@ -39,9 +39,9 @@ La carga requiere acceso nativo/regional y escritura, en borrador, rechazado o r
 - `GET /api/contracts/{cid}/uploads/{document_id}/text`: `{document, pages:[{page,text,method,confidence,chars,preview_url}], proposed_fields, warnings, review_status, mode:'local_extraction', ai_connected:false}`.
 - `GET /api/contracts/{cid}/uploads/{document_id}/preview?page=1`: PNG renderizado; no PDF/HTML del usuario ejecutable. Recuperar mediante fetch con cabecera y blob.
 - `GET /api/contracts/{cid}/uploads/{document_id}/original`: bytes originales como adjunto, MIME correcto; descarga auditada.
-- `GET /api/document-capabilities`: límites, disponibilidad de OCR e idiomas y `claude_connected:false`.
+- `GET /api/document-capabilities`: límites, `ocr_available:false`, `scan_mode:"simulado_por_nombre_de_archivo"` y `claude_connected:false`.
 
-En la lista de integraciones, `OCR local` refleja disponibilidad de Tesseract (`conectado`/`no_disponible`); Claude, firma y proveedores pagados siguen simulados/desconectados. No presentar la lectura local real como un consumo de API IA.
+En la lista de integraciones, `Lectura de archivos` figura `conectado` (texto PDF real; imágenes con escaneo simulado); Claude, firma y proveedores pagados siguen simulados/desconectados. No presentar la lectura local real como un consumo de API IA.
 
 Los tres endpoints requieren acceso **nativo al país o regional**. Una concesión entre países **no habilita original, previews, texto, evidencia original ni export de campos reservados**. En `state`, el contrato concedido tiene `sanitized_only:true`, `can_view_original:false`, `access_scope:'redacted_only'`, sin montos, partes, documentos originales, análisis ni historial confidencial. Solo puede abrir su extracto saneado una vez autorizado.
 
@@ -51,7 +51,7 @@ Los tres endpoints requieren acceso **nativo al país o regional**. Una concesi�
 
 ```json
 {
-  "provider":"Lectura local + OCR Tesseract", "mode":"local_extraction",
+  "provider":"Lectura local del texto PDF" | "Texto PDF + escaneo simulado por nombre de archivo", "scan_simulated":false, "mode":"local_extraction",
   "simulated":false, "ai_connected":false, "document_id":"upload-...",
   "summary":"Cantidad real de páginas, caracteres y propuestas",
   "text_preview":"Primeros 4000 caracteres realmente leídos",
@@ -88,7 +88,7 @@ Respuesta empresa añade `profile` y `fit:{score,score_type,decision,reasons,mis
 
 ## Validación
 
-`backend/tests/test_real_documents.py` usa PDF válido con texto real, imagen PNG creada con texto legible y OCR real si Tesseract está disponible, metadatos/bytes originales, evidencia/campos, revisión humana, ACL de carga/lectura, rechazo de daño/tamaño/MIME, concesión entre países solo a extracto saneado, revocación al versionar e ICP transparente. Ejecutar junto a suite existente con PostgreSQL real autorizado.
+`backend/tests/test_real_documents.py` usa PDF válido con texto real, imagen PNG con escaneo simulado por nombre de archivo (ejemplo conocido y nombre desconocido sin datos inventados), metadatos/bytes originales, evidencia/campos, revisión humana, ACL de carga/lectura, rechazo de daño/tamaño/MIME, concesión entre países solo a extracto saneado, revocación al versionar e ICP transparente. Ejecutar junto a suite existente con PostgreSQL real autorizado.
 
 **Resultado de la versión final: 15/15 pruebas aprobadas en 4,64 segundos**, staging aislado del VPS con PostgreSQL 16 y Tesseract real spa+eng. Incluye carga y lectura real del PDF y la imagen, además del recorrido empresa → candidatos → contacto vinculado → campaña con snapshot ICP. La validación visual de navegador se realiza por separado con el frontend contra una API temporal, antes de publicar.
 

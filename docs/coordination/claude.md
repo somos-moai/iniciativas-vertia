@@ -116,3 +116,28 @@ Estado: terminado 15-10-2026 ~22:15. Archivos liberados.
 1. Compilar el frontend (build-local.cjs) y publicarlo.
 2. Subir deliverables/ actualizados al VPS (/home/moai/iniciativas-vertia/deliverables): cambiaron los hashes de HTML, DOCX, PDF y zip.
 3. Limpiar los registros QA visibles en la base pública.
+
+## Trabajo en curso — Claude, 15-10-2026 23:35: defecto de versiones y escaneo simulado
+
+Por instrucción del usuario: la lectura de imágenes deja de usar OCR y pasa a ser un escaneo simulado que identifica el documento por el nombre del archivo, rotulado como simulado. El texto nativo de PDF se mantiene. Además se corrige el defecto PDF → PNG → PDF de campos vacíos. Archivos: backend/document_worker.py, backend/document_routes.py, backend/main.py (rótulo de integración), backend/tests/test_real_documents.py, frontend/src/DocumentWorkspace.jsx y textos relacionados. Pruebas en un PostgreSQL desechable local (puerto 5433), nunca contra producción.
+Estado: terminado 16-10-2026 ~00:30 (código y pruebas locales). Publicación pendiente de aprobación del usuario.
+
+### Resultado — defecto de versiones documentales
+
+Causa confirmada en DocumentWorkspace.jsx, en dos partes:
+1. El formulario se llenaba con un useEffect posterior al render: al cambiar de versión, las tarjetas del nuevo documento se dibujaban primero con inputs vacíos y luego se rellenaban. Una captura o aserción tomada al aparecer las tarjetas veía campos vacíos (la captura de Codex).
+2. La lectura cargada (documentData) no estaba ligada a su documento: en el primer render tras cambiar de versión se mostraban las propuestas de la versión anterior bajo el nombre de la nueva.
+
+Corrección: borradores por documento (valores, aceptación y notas aislados por id de versión); el valor mostrado se deriva en el render (borrador ?? propuesta), sin efecto de inicialización; la lectura solo se usa si data.document.id coincide con el seleccionado; mientras carga se muestra "Cargando la lectura de esta versión…". Una versión anterior se rotula, permite consultar evidencia y no permite confirmar; el backend sigue rechazando con 409 (sin cambios). Además, reintento acotado (3 intentos) al cargar original, texto y vista previa: en staging local el proxy cortó (ECONNRESET) una petición de vista previa y la interfaz quedaba sin imagen.
+
+Escaneo simulado (decisión del usuario): backend/document_worker.py ya no usa Tesseract; las imágenes y páginas sin texto se identifican por nombre de archivo (method "escaneo_simulado", aviso en warnings, analysis.scan_simulated). Los ejemplos publicados devuelven su contenido conocido; un archivo desconocido solo aporta el tipo inferido del nombre, nunca montos, partes ni fechas. Integración renombrada a "Lectura de archivos". Documentación actualizada: AGENTS.md, README.md, docs/API_UPLOADS.md, backend/README.md, frontend/README.md, flujos-y-modelo-datos.md.
+
+Pruebas (staging local aislado: PostgreSQL 17 desechable en 127.0.0.1:5433, API local, Vite con proxy; nunca producción):
+- backend/tests: 15/15 (incluye nueva prueba de escaneo simulado sin datos inventados).
+- frontend/qa-workspaces.cjs: 26/26; frontend/qa-workspaces-extra.cjs: 12/12 (expectativas de OCR actualizadas a escaneo simulado).
+- frontend/qa-document-versions.cjs (nueva): 31/31. PDF → PNG → PDF observando cada cuadro de animación, recarga y repetición, valores DOM sin escribir (12500, Faro Retail SpA, USD, 2026-10-01, 2027-12-31), borradores aislados, evidencia en página 1 de 3, 409 de revisión obsoleta, confirmación persistida en la versión vigente, móvil 390 sin overflow, sin errores JS.
+- Control: la misma prueba contra el componente anterior falla en "PNG → PDF: sin cuadros vacíos" (detecta el defecto).
+- Falla inyectada en la primera petición de vista previa: la imagen aparece por reintento.
+- Build: node frontend/build-local.cjs → index-BZpHhlYZ.js / index-CTvZoLKH.css.
+
+No publicado aún. Pendiente: aprobación del usuario para desplegar con infra/deploy-demo.py --publish --private, commit y push; revisión de Gemini en Antigravity.
