@@ -66,3 +66,7 @@ Build de producción correcto: index-VONnwKLm.js e index-CTvZoLKH.css. Las dos m
 La calificación comercial aplica reglas a los datos declarados y conserva fuentes y faltantes; no equivale a información externa verificada ni a una probabilidad de venta. La extracción PDF/OCR es real y local, con aceptación humana de los campos. Claude, proveedores de prospectos, correo y firma siguen siendo adaptadores simulados.
 
 Sin publicación desde este agente. El coordinador revisa y realiza el despliegue privado.
+
+## Defecto posterior confirmado y entrega pendiente
+
+Después de estos 38 checks, la revisión visual detectó que al volver de una imagen a un PDF anterior pueden aparecer vacíos los inputs de campos propuestos, aunque la evidencia esté disponible. El agente frontend confirmó el caso antes de la interrupción solicitada por el usuario. No hay hotfix validado. Este resultado no cubre la correcta población de esos inputs al alternar versiones; ver HANDOFF_BUG_DOCUMENTOS.md y HANDOFF_CLAUDE.md antes de dar la entrega por cerrada.
