@@ -47,6 +47,7 @@ def make_engine():
 
 def initialize(engine):
     from .seed import seed
+    from .seed_v3 import seed_v3
     # Serialize DDL and seed together, including simultaneous ASGI worker startup.
     with engine.begin() as connection:
         connection.execute(text("SELECT pg_advisory_xact_lock(84261015)"))
@@ -55,3 +56,7 @@ def initialize(engine):
             if not session.get(Meta, "seed_v1"):
                 seed(session)
                 session.add(Meta(key="seed_v1", value={"version": 1, "synthetic": True}))
+
+            if not session.get(Meta, "seed_v3"):
+                seed_v3(session)
+                session.add(Meta(key="seed_v3", value={"version": 3, "synthetic": True, "migration": "additive", "anchor": "2026-10-16"}))

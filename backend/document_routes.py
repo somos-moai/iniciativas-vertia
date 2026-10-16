@@ -54,7 +54,7 @@ def original_path(upload):
 def require_native(s,user,contract):
     from . import main as api
     api.read(s,user,contract)
-    if user["role"]!="regional" and user["country"]!=contract.data["country"]:
+    if not api.all_countries(user) and user["country"]!=contract.data["country"]:
         raise HTTPException(403,"El acceso entre países permite únicamente la copia saneada, no el original ni su texto")
 
 def public_document(upload):

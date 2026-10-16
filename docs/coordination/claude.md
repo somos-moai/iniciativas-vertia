@@ -149,3 +149,28 @@ Aprobada por el usuario. `python infra/deploy-demo.py --publish --private` desde
 Comprobación sin credenciales: 401 anónimo en `/`, `/contratos`, `/prospectador`, `/api/health`, `/api/state`, `/propuestas/contratos.pdf` y `/samples/...`. Servicio `active`. `index.html` publica `index-BZpHhlYZ.js` / `index-CTvZoLKH.css`; hash del JS y de `backend/document_worker.py` idénticos a los locales. `/api/document-capabilities` en loopback: `ocr_available:false`, `scan_mode:simulado_por_nombre_de_archivo`.
 
 Pendiente: verificación autenticada del usuario (PDF → PNG → PDF en el sitio privado). La prueba `frontend/qa-document-versions.cjs` escribe datos y no debe apuntarse a producción.
+
+## Traspaso a Codex — Experiencia v3, 16-10-2026
+
+Por instrucción del usuario, el siguiente ciclo (perfiles con nombre, logo, tablero, Lusha y créditos, correo como el bot de Agustín, datos masivos realistas, dashboards YoY/MoM/YTD, modo oscuro, imágenes generadas y presentación scrollytelling) queda encargado a Codex en `docs/coordination/ENCARGO_CODEX_V3.md`. La guía de movimiento se copió a `docs/context/MOTION_GUIDE.md`. Gemini no tenía asignada esta implementación; su revisión independiente sigue pendiente.
+
+## Decisión del usuario — 16-10-2026: solo escritorio
+
+Las maquetas y la presentación se evalúan solo en escritorio. Las comprobaciones de 390 px pasan a ser informativas y no bloquean el cierre de la experiencia v3. Registrado también en ENCARGO_CODEX_V3.md.
+
+## Trabajo en curso — Claude, 16-10-2026 ~11:45: cierre de experiencia v3 tras el corte de Codex
+
+Codex quedó sin tokens antes de su verificación final. Claude retoma en staging local aislado (PostgreSQL desechable 127.0.0.1:5433; frontend compilado servido por FastAPI en 127.0.0.1:8000, sin proxy de Vite, porque el proxy de desarrollo en Windows corta respuestas grandes con ERR_CONNECTION_RESET). Solo escritorio, por decisión del usuario.
+Archivos que tocará: frontend/qa-document-versions.cjs y frontend/qa-workspaces.cjs (esperas basadas en estado), CSS de contraste en tema oscuro, backend/seed_v3.py (realismo de la historia mensual y de correos). No se publica ni se hace commit sin aprobación del usuario.
+
+### Avance del cierre v3 (Claude, 16-10-2026)
+
+- Verificado lo de Codex: compila; backend 33/33 (30 de Codex + 3 de transporte) sobre PostgreSQL local con Python 3.13; presentación 550/550; suite comercial 28/28 una vez fuera del proxy de Vite.
+- Causa de los bloqueos de QA de Codex: en Windows, uvicorn con el bucle Proactor (por defecto) y el proxy de Vite cortan respuestas grandes de /api/state (ERR_CONNECTION_RESET / WinError 10054). Con `--loop asyncio:SelectorEventLoop`: 30/30 transferencias sin cortes. Es un problema solo del entorno local; el VPS usa Linux.
+- Pruebas corregidas (esperas por condición, no por tiempo): `qa-document-versions.cjs` (esperar la opción .pdf tras el refresco) y `qa-workspaces.cjs` (esperar el ICP guardado; la semilla v3 ya trae uno por país).
+- Contraste: `workbench.css` y `flows.css` no conocían el tema oscuro. Nuevo `scripts/gen_dark_overrides.py` genera `frontend/src/dark-overrides.css` (importado en main.jsx) y conserva el tono de marca/estado aclarándolo. Correcciones manuales en `theme.css` para componentes de styles.css, enlaces y grises bajo 4,5:1 en tema claro; incluye el hero de inversión de "Alcance y roadmap", cuyo título quedaba azul sobre azul (1,18:1). Medidor propio sobre todas las secciones de ambas apps en ambos temas: sin textos bajo AA, salvo lo listado como pendiente.
+- Semilla `backend/seed_v3.py`: la historia era uniforme (`i%18`; oportunidades en meses alternos; tasas fijas por módulo). Ahora: tendencia del piloto, estacionalidad, variación por país y tasas de respuesta, rebote y reunión que mejoran con el tiempo; oportunidades con curva propia y cuenta creada antes; correos nombre.apellido@dominio sin sufijos numéricos; teléfonos con formato de cada país; contrapartes heredadas "Contraparte X CC" convertidas en razón social. Mismos volúmenes (480 / 1.972 / 235 / 245).
+- Regresión corregida en `backend/main.py`: el bloqueo de edición se evaluaba antes de `request_access`, por lo que perfiles de consulta (viewer-ar) ya no podían pedir acceso entre países, con el mensaje del perfil de Innovación. Ahora la solicitud queda exenta y cada rol recibe su mensaje. Nueva prueba `test_read_only_profiles_can_request_access_but_not_edit` (backend 34/34).
+- Embudo del dashboard comercial: mostraba "400 % del paso anterior". `AnalyticsDashboard.jsx` cuenta una etapa como alcanzada si el estado actual es igual o posterior; la semilla registra cada etapa intermedia (`stage_history`).
+- Perfiles por defecto (decisión del usuario): Prospectador abre con Agustín Silva y Contratos con Gonzalo Oviedo. Clave nueva `vertia-demo-profile-v3-<app>` para que el cambio aplique también a navegadores con el perfil anterior guardado. Las suites fijan explícitamente su perfil de prueba (regional) en cada contexto. Gonzalo es de solo lectura y configuración por el rol aprobado: para mostrar el ciclo contractual completo se cambia a Phillipe.
+- Staging local: uvicorn con `--loop asyncio:SelectorEventLoop` en Windows (el Proactor por defecto corta respuestas grandes).

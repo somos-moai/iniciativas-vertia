@@ -72,7 +72,7 @@ def build_html(project,md):
         heading=re.sub('<[^>]+>','',parts[i]); sid=f'seccion-{i}'
         nav.append(f'<a href="#{sid}">{html.escape(heading)}</a>')
         sections.append(f'<section id="{sid}"><span class="section-kicker">{(i+1)//2:02d} / {title}</span>{parts[i]}{parts[i+1] if i+1<len(parts) else ""}</section>')
-    logo=ROOT/'frontend/public/brand'/('global.webp' if ident=='prospectador' else 'vertia.webp')
+    logo=ROOT/'frontend/public/brand'/('global-oficial.webp' if ident=='prospectador' else 'vertia.webp')
     brand64=base64.b64encode(logo.read_bytes()).decode()
     pdf=f'{ident}.pdf'; docx=f'{ident}.docx'
     theme=':root{--ink:#0a2240;--accent:#ce0e2d}' if ident=='prospectador' else ''
@@ -112,10 +112,9 @@ def style_docx(path,project):
     moai=Path(r'C:\Users\cueva\OneDrive\Escritorio\Presupuestador MoAI\.claude\skills\propuesta-moai\assets\moai-logo-negro.png')
     if moai.exists():
         mark=Image.open(moai).convert('RGBA');mark.thumbnail((300,115));brand.paste(mark,(0,15),mark)
-    client=Image.open(ROOT/'frontend/public/brand'/('global.webp' if project['id']=='prospectador' else 'vertia.webp')).convert('RGBA')
+    client=Image.open(ROOT/'frontend/public/brand'/('global-oficial.webp' if project['id']=='prospectador' else 'vertia.webp')).convert('RGBA')
     client.thumbnail((370,110))
-    if project['id']=='contratos':
-        ImageDraw.Draw(brand).rounded_rectangle((1000,0,1400,145),radius=8,fill='#103B58')
+    ImageDraw.Draw(brand).rectangle((1000,0,1399,149),fill='#0A2240' if project['id']=='prospectador' else '#103B58')
     brand.paste(client,(1020,15),client)
     brandpath=OUT/(project['id']+'-marcas.png');brand.save(brandpath)
     for table in doc.tables:

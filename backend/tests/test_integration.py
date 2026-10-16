@@ -45,13 +45,13 @@ def action(c,application,name,id=None,payload=None,user="regional",expected=200)
 def test_health_real_postgres_and_seed(client):
     assert client.get("/api/health").json()["database"]=="postgresql"
     s=state(client,"contratos")
-    assert len(s["contracts"])==25
+    assert len(s["contracts"])>200
     assert len(s["countries"])==5
     assert all(i["status"]=="simulado" for i in s["integrations"] if i["name"] not in {"PostgreSQL","Lectura de archivos"})
 
 def test_country_owner_acl_and_invalid_profile(client):
     s=state(client,"prospectador","executive-uy")
-    assert len(s["contacts"])==8
+    assert len(s["contacts"])>700
     assert all(c["country"]=="UY" and c["owner_id"]=="executive-uy" for c in s["contacts"])
     assert client.get("/api/state?app=contratos",headers={"X-Demo-User":"admin"}).status_code==401
     action(client,"prospectador","exclude_contact","contact-CL-0-0",user="executive-uy",expected=403)

@@ -1,0 +1,114 @@
+:root{--bg:#f3f6f9;--panel:#fff;--surface:#edf2f6;--text:#173046;--ink:#173046;--muted:#506579;--line:#d7e1e9;--border:var(--line);--soft-global:#fff0f3;--soft-vertia:#eef5db;--positive:#23683c;--negative:#a82743;--chart:#0a527a;--chart-alt:#ae1231;--focus:#166db1;--shadow:0 8px 30px #102b4510}
+:root[data-theme=dark]{--bg:#0e1924;--panel:#152534;--surface:#1c3042;--text:#eef4f9;--ink:#eef4f9;--muted:#b6c8d6;--line:#344c5f;--border:var(--line);--soft-global:#3b2330;--soft-vertia:#283829;--positive:#a3dfb4;--negative:#ffb6c5;--chart:#86c9e7;--chart-alt:#ffa3b6;--focus:#9bd9f5;--shadow:0 8px 30px #0003}
+body{background:var(--bg);color:var(--text)}
+.app{background:var(--bg);color:var(--text);--ink:var(--text);--soft:var(--soft-global)}
+.app.theme-vertia{--ink:var(--text);--soft:var(--soft-vertia)}
+.theme-control{display:inline-flex;align-items:center;gap:6px;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:var(--panel);min-height:34px;flex:none}
+.theme-control select{background:transparent;color:inherit;font-size:12px;max-width:75px;cursor:pointer}
+.theme-control option{background:var(--panel);color:var(--text)}
+.app :is(.topbar,.metric:not(.metric-accent),.panel,.drawer,.modal,.toast,.busy-indicator,.notification-menu,.welcome-strip,.company-mini,.prospect-card,.opportunity-card){background:var(--panel);border-color:var(--line)}
+.app :is(.contextbar,.drawer-foot,.check-list,.analysis-summary,.callout,.obligation-card,.findings article,.document-list>div,.recipient-list>div,.recipient-list>button,.kanban-column){background:var(--surface);border-color:var(--line)}
+.app :is(.contextbar,.breadcrumb,.eyebrow,.section-heading p,.panel-heading p,.metric-top,.metric-bottom>span,.welcome-strip,.welcome-right,.callout,.muted,.info-banner,.country-selector,.country-selector select,.text-link,.bar-title,.funnel-step,.country-bars,.country-bars b,.field>span,.field>small,.checkbox-line,.detail-tabs button,.drawer-foot,.detail-facts small,.detail-facts b,.timeline b,.timeline p,.timeline small,.document-list small,.document-list b,.findings p,.findings blockquote,.analysis-summary p,.analysis-summary small,.obligation-card p,.amendment p,.amendment small,.notification-menu>div,.notification-menu small,.page-footer,.profile-select>span,.company-mini small,.prospect-card>p,.prospect-person small,.email-preview){color:var(--muted)}
+.app :is(h1,h2,h3,h4,.metric-value,.bar-title b,.breadcrumb b,.welcome-strip b,.check-list b,.timeline b,.amendment b,.company-mini b,.prospect-person b,.toast-title){color:var(--text)}
+.app :is(th){background:var(--surface);color:var(--muted)}
+.app :is(td,td small){color:var(--muted);border-color:var(--line)}
+.app td b{color:var(--text)}
+.app :is(tbody tr:hover,tr[tabindex]:hover){background:var(--surface)}
+.app :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:var(--panel);color:var(--text);border-color:var(--line)}
+.app :is(input,textarea)::placeholder{color:var(--muted);opacity:1}
+.app .global-search input{background:transparent}
+.app .btn.secondary{background:var(--panel);color:var(--text);border-color:var(--line)}
+.app .btn.ghost{color:var(--muted)}
+.app.theme-vertia .btn:not(.secondary):not(.ghost):not(.danger){color:#163623}
+.app .btn.danger{background:var(--soft-global);color:var(--negative)}
+.app .badge{background:var(--surface);color:var(--muted);border-color:var(--line)}
+.app :is(.badge-activo,.badge-completada,.badge-aprobada,.badge-aprobado,.badge-ganado,.badge-revelado,.badge-firmado){color:var(--positive);background:var(--soft-vertia)}
+.app :is(.badge-no_contactar,.badge-rechazado,.badge-perdido){color:var(--negative);background:var(--soft-global)}
+.app .country-code{background:var(--surface);color:var(--text)}
+.app :is(.avatar,.file-icon,.company-mark,.timeline-icon){background:var(--surface);color:var(--text);border-color:var(--line)}
+.app .metric-accent :is(.metric-top,.metric-bottom>span){color:#cfdeeb}
+.app .metric-accent .metric-value{color:#fff}
+.app .bar-track{background:var(--surface)}
+.app .sidebar{overflow-y:auto;scrollbar-width:thin}
+.app .global-brand{background:#f3f6f9;border-radius:0;max-width:none;margin:-28px -16px 20px;padding:21px 29px;height:88px;flex:none}
+.app .global-brand img{width:178px;max-width:100%;max-height:52px;height:auto}
+.app .brand:not(.global-brand) img{width:146px;height:auto}
+.app .side-nav button,.app .sidebar-bottom>a{color:#d1deea}
+.app .sidebar :is(.nav-label,.workspace-label small,.sidebar-demo small,.powered){color:#b5c8db}
+.app .sidebar :is(.workspace-label,.sidebar-demo){color:#f0f5fa}
+.app .topbar{min-height:78px;height:auto;padding-top:12px;padding-bottom:12px}
+.app .profile-select{max-width:260px}
+.app .profile-select select{max-width:260px;font-size:13px}
+.app .profile-select>span{font-size:10px;letter-spacing:.2px}
+.app .detail-tabs{border-color:var(--line)}
+.app .detail-tabs .active{color:var(--text)}
+.app .toast.error{color:var(--negative)}
+.app .demo-pill{background:var(--surface);color:var(--positive);border-color:var(--line)}
+.app .info-banner{background:var(--surface);border-color:var(--line);color:var(--text)}
+.app .info-banner p{color:var(--muted)}
+.app .overdue{color:var(--negative)}
+.app .drill-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding:12px 16px;border:1px solid var(--line);background:var(--panel);border-left:3px solid var(--chart);border-radius:6px;color:var(--text);font-size:13px}
+.app .drill-banner button{color:var(--chart);text-decoration:underline;flex:none}
+/* Workspace documentaire: conserve intégralement la logique des versions. */
+[data-theme=dark] .app :is(.dw-card,.dw-preview,.dw-review,.dw-page-text,.dw-empty,.dw-processing,.dw-shared,.dw-extraction,.dw-review-fields,.dw-field-review,.dw-document-card,.dw-panel,.dw-version,.pw-card,.pw-profile-editor,.pw-account-sidebar,.pw-company-card,.pw-fit-card,.pw-campaign-qualification,.pw-step,.pw-toolbar){background:var(--panel);border-color:var(--line);color:var(--text)}
+[data-theme=dark] .app :is(.dw-layout,.dw-preview-canvas,.dw-tabs,.dw-field,.dw-source,.dw-evidence,.dw-stat,.pw-summary,.pw-stepper,.pw-candidates>div,.pw-criterion,.pw-facts>div,.pw-account-sidebar button){background:var(--surface);border-color:var(--line)}
+[data-theme=dark] .app :is([class^=dw-],[class^=pw-]) :is(p,small,label,summary,li,dt,dd,blockquote,pre){color:var(--muted)}
+[data-theme=dark] .app :is([class^=dw-],[class^=pw-]) :is(h1,h2,h3,h4,b,strong){color:var(--text)}
+[data-theme=dark] .app .sk{background:var(--surface)}
+:is(button,a,input,select,textarea):focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media(max-width:760px){.app .topbar{gap:6px;padding:10px 14px;flex-wrap:wrap}.app .topbar-tools{margin-left:auto;gap:8px}.app .profile-select select{max-width:170px;font-size:11px}.theme-control{padding:5px;gap:3px}.theme-control select{font-size:11px;max-width:60px}.app .breadcrumb>span{display:none}.app .contextbar{height:auto;min-height:47px;padding-top:8px;padding-bottom:8px}.app .global-brand{margin-top:-28px}.app .drill-banner{align-items:flex-start}}
+
+/* Contraste en tema oscuro (Claude, 16-10-2026): componentes de styles.css sin adaptación y enlaces.
+   Las hojas workbench.css y flows.css se adaptan en dark-overrides.css (generado). */
+.global-search kbd{color:#5e7182}
+:root[data-theme=dark] .app .global-search kbd{color:var(--muted);border-color:var(--line)}
+:root[data-theme=dark] .app .fx{--fx-text:var(--text);--fx-muted:var(--muted);--fx-line:var(--line);--fx-soft:var(--surface)}
+:root[data-theme=dark] .app .fx code{background:var(--surface);color:var(--text)}
+:root[data-theme=dark] .app .fx-step-marker span,:root[data-theme=dark] .app .fx-count{background:var(--chart);color:#0e1924}
+:root[data-theme=dark] .app .fx-key{background:var(--chart);color:#0e1924}
+:root[data-theme=dark] .app .fx-fk{background:var(--surface);color:var(--text)}
+:root[data-theme=dark] .app .fx-live{background:var(--surface);color:var(--text)}
+:root[data-theme=dark] .app :is(.fx-go,.fx-relations td button,.fx-hint button){color:var(--chart)}
+:root[data-theme=dark] .app .fx-bar i{background:var(--chart)}
+:root[data-theme=dark] .app :is(.integration-card,.roadmap-list>article){background:var(--panel);border-color:var(--line)}
+:root[data-theme=dark] .app :is(.integration-card h2,.roadmap-list h2){color:var(--text)}
+:root[data-theme=dark] .app :is(.integration-card>p,.roadmap-list p,.info-banner p){color:var(--muted)}
+:root[data-theme=dark] .app .integration-card footer{color:var(--muted);border-top-color:var(--line)}
+:root[data-theme=dark] .app .roadmap-number{color:var(--muted)}
+:root[data-theme=dark] .app .info-banner{background:var(--surface);border-color:var(--line);color:var(--muted)}
+:root[data-theme=dark] .app .info-banner b{color:var(--text)}
+:root[data-theme=dark] .app .process-strip :is(span,i,b,small){color:var(--muted)}
+:root[data-theme=dark] .app .score{color:var(--muted)}
+:root[data-theme=dark] .app .cell-link{color:var(--chart)}
+:root[data-theme=dark] .app .cell-link:hover{color:var(--text)}
+:root[data-theme=dark] .app .cw-link{color:#ff9aab}
+:root[data-theme=dark] .app .process-strip{background:var(--panel);border-color:var(--line)}
+:root[data-theme=dark] .app .process-strip i{background:var(--surface);border-color:var(--line)}
+:root[data-theme=dark] .app .fx-tabs button.active{color:var(--text);border-color:var(--chart);box-shadow:0 0 0 1px var(--chart)}
+:root[data-theme=dark] .app .fx-entity.is-focus,:root[data-theme=dark] .app .fx-entity.is-related{border-color:var(--chart);box-shadow:0 0 0 2px var(--chart)}
+
+/* Contraste en tema claro (Claude, 16-10-2026): grises heredados bajo 4.5:1 y el hero de inversión. */
+.app .roadmap-hero :is(h2,h2 span,p,b,span,.eyebrow){color:#fff}
+.app .roadmap-hero :is(p,.eyebrow,span){color:#d3e0ea}
+.app .score{color:#566b7c}
+.app .pw-workbench .section-heading>.wb-pill{color:#4d6577}
+.app .wb-stepper :is(small,b){color:#55697b}
+.app .wb-stepper>button.active :is(small,b){color:#3c5468}
+.app :is(.wb-profile-name p,.wb-field>small,.pw-criteria-form .wb-form-footer>p){color:#55697b}
+.app .pw-country-checks label{color:#4d6577}
+.app .pw-country-checks label b,.app label>b{color:#55697b}
+.app .process-strip>span{color:#4f6375}
+.app .process-strip i{color:#5e7182}
+.app .integration-card>p,.app .integration-card footer{color:#5e7182}
+.app .integration-grid p{color:#5e7182}
+.app .roadmap-number{color:#7f93a4}
+.app .roadmap-list p,.app .panel-prose{color:#55697b}
+:root[data-theme=dark] .app :is(.score,.wb-profile-name p,.wb-field>small,.pw-criteria-form .wb-form-footer>p,.pw-country-checks label,.pw-country-checks label b,.process-strip>span,.process-strip i,.integration-card>p,.integration-card footer,.integration-grid p,.roadmap-list p,.panel-prose,.roadmap-number,.wb-stepper small,.wb-stepper b){color:var(--muted)}
+:root[data-theme=dark] .app .wb-stepper>button.active :is(small,b){color:var(--text)}
+.app :is(.wb-sticky-card>.wb-eyebrow,.wb-sticky-card>p,.wb-criteria-summary b,.wb-criteria-summary p,.requirements-list p){color:#55697b}
+.app .pw-icp-history :is(span,b,small){color:#55697b}
+:root[data-theme=dark] .app :is(.wb-sticky-card>.wb-eyebrow,.wb-sticky-card>p,.wb-criteria-summary b,.wb-criteria-summary p,.requirements-list p,.pw-icp-history span,.pw-icp-history b,.pw-icp-history small){color:var(--muted)}
+.app .empty p{color:#5e7182}
+:root[data-theme=dark] .app .empty p{color:var(--muted)}
+.app .empty h3{color:#4f6375}
+:root[data-theme=dark] .app .empty h3{color:var(--text)}

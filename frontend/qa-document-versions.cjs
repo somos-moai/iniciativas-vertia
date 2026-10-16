@@ -23,7 +23,8 @@ async function openDocuments(page,reference){
 }
 async function waitReading(page){await page.locator('.wb-success').waitFor({timeout:100000});await page.locator('.dw-processing').waitFor({state:'detached'})}
 const selector=page=>page.getByLabel('Seleccionar documento del expediente');
-async function optionFor(page,ext){return page.evaluate(ext=>[...document.querySelector('select[aria-label="Seleccionar documento del expediente"]').options].filter(o=>o.textContent.includes(ext)).at(-1).value,ext)}
+// Espera a que el estado refrescado incluya la versión: con la semilla grande el refresco tarda más que la lectura.
+async function optionFor(page,ext){await page.waitForFunction(ext=>[...(document.querySelector('select[aria-label="Seleccionar documento del expediente"]')?.options||[])].some(o=>o.textContent.includes(ext)),ext,{timeout:30000});return page.evaluate(ext=>[...document.querySelector('select[aria-label="Seleccionar documento del expediente"]').options].filter(o=>o.textContent.includes(ext)).at(-1).value,ext)}
 // Observa cada cuadro: tarjetas visibles con un input vacío o con el archivo de otra versión es un fallo.
 async function watchFrames(page){await page.evaluate(()=>{window.__dwBad=[];const sel=()=>document.querySelector('select[aria-label="Seleccionar documento del expediente"]');const tick=()=>{const inputs=[...document.querySelectorAll('.dw-field-card input[aria-label^="Valor revisado"]')];const s=sel();const expected=s?.selectedOptions[0]?.textContent.split(' · ')[0];const shown=document.querySelector('.dw-preview header span')?.textContent;if(inputs.length&&inputs.some(i=>i.value===''))window.__dwBad.push('vacío');if(inputs.length&&expected&&shown!==expected)window.__dwBad.push('archivo '+shown+' ≠ '+expected);window.__dwRaf=requestAnimationFrame(tick)};tick()})}
 async function stopFrames(page){return page.evaluate(()=>{cancelAnimationFrame(window.__dwRaf);return [...new Set(window.__dwBad)]})}
@@ -36,14 +37,14 @@ function assertPdf(label,v,bad){
 }
 
 async function main(){
- const browser=await chromium.launch({channel:'msedge',headless:true});
+ const browser=await chromium.launch({channel:'msedge',headless:true});const __nc=browser.newContext.bind(browser);browser.newContext=async(o)=>{const c=await __nc(o);await c.addInitScript(()=>{for(const a of ['prospectador','contratos'])if(!localStorage.getItem('vertia-demo-profile-v3-'+a))localStorage.setItem('vertia-demo-profile-v3-'+a,'regional')});return c};
  try{
   const ctx=await browser.newContext({viewport:{width:1440,height:1000}}),page=await ctx.newPage();
   page.on('pageerror',e=>report.page_errors.push(e.message));
   const created=await api(ctx,{app:'contratos',action:'create_contract',payload:{title:'QA versiones documentales',country:'CL',company:'Sociedad ficticia QA',amount:0}});
   check('Expediente sintético creado',created.status===200,String(created.status));
   const cid=created.json.entity.id,reference=created.json.entity.reference;
-  await page.addInitScript(()=>localStorage.setItem('vertia-demo-profile','regional'));
+  await page.addInitScript(()=>['prospectador','contratos'].forEach(a=>localStorage.setItem('vertia-demo-profile-v3-'+a,'regional')));
   await openDocuments(page,reference);
   await page.getByRole('button',{name:'Probar PDF de ejemplo'}).click();await waitReading(page);
   await page.getByRole('button',{name:'Probar imagen de ejemplo'}).click();await waitReading(page);

@@ -1,0 +1,11 @@
+import hero from './hero/index.js';
+import problema from './problema/index.js';
+import app1Intro from './app1-intro/index.js';
+import app1Wow from './app1-wow/index.js';
+import app2Intro from './app2-intro/index.js';
+import app2Wow from './app2-wow/index.js';
+import modelo from './modelo/index.js';
+import regional from './regional/index.js';
+import alcance from './alcance/index.js';
+import cierre from './cierre/index.js';
+export const scenes=[hero,problema,app1Intro,app1Wow,app2Intro,app2Wow,modelo,regional,alcance,cierre];

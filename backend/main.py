@@ -17,6 +17,7 @@ from uuid import uuid4
 from pathlib import Path
 
 from fastapi import FastAPI, Depends, Header, HTTPException, Query
+from starlette.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, Response, FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
@@ -24,8 +25,9 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from .db import Record, DocumentUpload, make_engine, initialize
 from .seed import USERS, COUNTRIES
+from .permissions import supports, all_countries, editable, profiles, capabilities
 
-KINDS = ["companies","contacts","campaigns","activities","opportunities","prospects","messages","contracts","access_requests","obligations","audit","notifications","icp_profiles"]
+KINDS = ["companies","contacts","campaigns","activities","opportunities","prospects","messages","contracts","access_requests","obligations","audit","notifications","icp_profiles","sequences","email_drafts","search_runs","ai_settings","clm_settings","mail_sync"]
 APPS = {"prospectador","contratos"}
 
 def now():
@@ -43,6 +45,7 @@ async def lifespan(app):
     app.state.engine.dispose()
 
 app = FastAPI(title="Vertia · Demostración sintética", version="1.0.0", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1500, compresslevel=5)
 
 @app.middleware("http")
 async def private_demo_responses(request,call_next):
@@ -64,9 +67,12 @@ async def private_demo_responses(request,call_next):
     response=await call_next(request)
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"]="no-store"
-        response.headers["Vary"]="X-Demo-User"
+        response.headers["Vary"]=", ".join(dict.fromkeys([part.strip() for part in response.headers.get("Vary","").split(",") if part.strip()]+["X-Demo-User"]))
         response.headers["X-Content-Type-Options"]="nosniff"
     return response
+
+from .transport import ResponseChunkMiddleware
+app.add_middleware(ResponseChunkMiddleware, chunk_size=64*1024)
 
 def session():
     with app.state.sessions() as s:
@@ -90,7 +96,7 @@ def save(s, record, **changes):
     return record.data
 
 def new(s, application, kind, **data):
-    rid=f"{kind.rstrip('s')}-{uuid4().hex[:12]}"
+    rid=data.pop("id",None) or f"{kind.rstrip('s')}-{uuid4().hex[:12]}"
     body={"id":rid,"created_at":now(),**data}
     r=Record(id=rid,app=application,kind=kind,data=body)
     s.add(r)
@@ -116,7 +122,8 @@ def granted(s, user, cid):
 
 def allowed(s, user, r):
     d=r.data
-    if user["role"]=="regional":
+    if not supports(user,r.app): return False
+    if all_countries(user):
         return True
     if r.app=="prospectador":
         if user["role"]=="legal":
@@ -136,11 +143,11 @@ def read(s,user,r):
 
 def write(s,user,r,roles=None):
     read(s,user,r)
-    if user["role"]=="viewer":
-        fail("El perfil de consulta no puede modificar registros",403)
-    if user["role"]!="regional" and r.data.get("country")!=user["country"]:
+    if not editable(user):
+        fail("Este perfil tiene lectura o configuración; no puede modificar registros operativos",403)
+    if user["role"] not in {"regional","superadmin"} and r.data.get("country")!=user["country"]:
         fail("La autorización entre países permite consulta, no edición",403)
-    if roles and user["role"] not in roles:
+    if roles and user["role"] not in roles and user["role"]!="superadmin":
         fail("Esta acción requiere un perfil autorizado de jefatura o Legal",403)
 
 def text_field(p,key,default=None,limit=1000):
@@ -153,10 +160,10 @@ def country_field(user,p):
     cc=p.get("country",user["country"])
     if not isinstance(cc,str) or cc not in {c["code"] for c in COUNTRIES}:
         fail("País inválido")
-    if user["role"]!="regional" and cc!=user["country"]:
+    if user["role"] not in {"regional","superadmin"} and cc!=user["country"]:
         fail("No puede crear registros de otro país",403)
-    if user["role"]=="viewer":
-        fail("Perfil de consulta",403)
+    if not editable(user):
+        fail("Este perfil no puede crear registros operativos",403)
     return cc
 
 def amount_field(p):
@@ -194,15 +201,21 @@ def integrations(application):
 def state(s,user,application):
     if application not in APPS:
         fail("Aplicación inválida")
+    if not supports(user,application): fail("Perfil no habilitado para esta aplicación",403)
     out={k:[] for k in KINDS}
-    for r in records(s,application):
+    application_records=records(s,application)
+    for r in application_records:
+        if r.kind not in out: continue
         if allowed(s,user,r):
             d=dict(r.data)
             if r.kind=="contracts":
-                d.update({"can_access":True,"can_edit":user["role"]!="viewer" and (user["role"]=="regional" or d["country"]==user["country"]),"restricted":False})
-                if user["role"]!="regional" and d["country"]!=user["country"]:
+                d.update({"can_access":True,"can_edit":editable(user) and (user["role"] in {"regional","superadmin"} or d["country"]==user["country"]),"restricted":False})
+                if not all_countries(user) and d["country"]!=user["country"]:
                     d={"id":r.id,"title":"Documento con acceso a extracto saneado","name":"Extracto regional autorizado","reference":d["reference"],"country":d["country"],"status":d["status"],"confidential":True,"can_access":True,"can_edit":False,"can_view_original":False,"access_scope":"redacted_only","restricted":False,"sanitized_only":True,"redacted_ready":d.get("redacted_ready",False),"documents":[],"history":[],"analysis":None}
             if r.kind=="prospects" and not d.get("revealed"):
+                email=d.get("email",""); phone=d.get("phone","")
+                d["email_masked"]=(email[:1]+"••••@"+email.split("@")[-1]) if email else "No disponible"
+                d["phone_masked"]=(phone[:3]+" ••• ••• "+phone[-2:]) if phone else "No disponible"
                 d["email"]=None
                 d["phone"]=None
             out[r.kind].append(d)
@@ -216,7 +229,7 @@ def state(s,user,application):
     obligations=out["obligations"]
     overdue=sum(o.get("status")!="completada" and o.get("due_date","9999")<date.today().isoformat() for o in obligations)
     messages=out["messages"]
-    sent=sum(m.get("direction")=="outbound" for m in messages)+sum(c.get("sent_count",0) for c in out["campaigns"] if re.fullmatch(r"campaign-[A-Z]{2}-[0-2]",c["id"]))
+    sent=sum(m.get("direction")=="outbound" and m.get("status") in {"simulado","enviado_simulado"} for m in messages)+sum(c.get("sent_count",0) for c in out["campaigns"] if re.fullmatch(r"campaign-[A-Z]{2}-[0-2]",c["id"]))
     replies=sum(c.get("status")=="respondió" for c in contacts)
     pipeline=sum(o.get("amount",0) for o in out["opportunities"] if o.get("status") not in {"perdido","ganado"})
     out["metrics"]={"companies":len(out["companies"]),"contacts":len(contacts),"total_contacts":len(contacts),"prospects":len(out["prospects"]),"campaigns":len(out["campaigns"]),"active_campaigns":sum(c.get("status")=="enviada" for c in out["campaigns"]),"sent":sent,"replies":replies,"reply_rate":round(replies/max(sent,1)*100,1),"meetings":sum(a.get("type")=="meeting" for a in out["activities"]),"pipeline":pipeline,"pipeline_value":pipeline,"excluded":sum(c.get("excluded",False) for c in contacts),"contracts":len(contracts),"total_contracts":len(contracts),"active_contracts":sum(c.get("status")=="activo" for c in contracts),"pending_approval":sum(c.get("status") in {"en_revision","pendiente_aprobacion"} for c in contracts),"pending_signature":sum(c.get("status")=="pendiente_firma" for c in contracts),"expiring_soon":sum(0<=(date.fromisoformat(c["end_date"])-date.today()).days<=90 for c in contracts if c.get("end_date")),"overdue_obligations":overdue,"obligations":len(obligations),"contract_value":sum(c.get("amount",0) for c in contracts),"access_requests":sum(r.get("status")=="pendiente" for r in out["access_requests"])}
@@ -225,7 +238,14 @@ def state(s,user,application):
     credit_limit=250*max(1,len({p.get("owner_id") for p in out["prospects"]}))
     active_icp=[c for c in out["icp_profiles"] if c.get("status")=="activo"]
     out["icp"]=next((c for c in active_icp if c.get("owner_id")==user["id"]),active_icp[0] if active_icp else None)
-    out.update({"viewer":user,"users":USERS,"countries":COUNTRIES,"integrations":integrations(application),"credits":{"used":used,"limit":credit_limit,"remaining":max(credit_limit-used,0),"provider":"Lusha simulado","scope":"250 por cartera; agregado visible"},"generated_at":now(),"mode":"synthetic","roadmap":[{"id":"mvp","name":"MVP operativo","title":"MVP operativo","status":"incluido","description":"Piloto con perfiles, aprobaciones y trazabilidad"},{"id":"regional","name":"Consolidación regional","title":"Consolidación regional","status":"incluido","description":"Configuración base de cinco países, validación local por Vertia"},{"id":"evolution","name":"Evolución especializada","title":"Evolución especializada","status":"ampliacion","description":"WhatsApp/LinkedIn y conectores adicionales" if application=="prospectador" else "ERP avanzado, portal externo, add-in Word y analítica predictiva"}]})
+    out.update({"viewer":{**user,"capabilities":capabilities(user)},"users":profiles(USERS,application),"countries":COUNTRIES,"integrations":integrations(application),"credits":{"used":used,"limit":credit_limit,"remaining":max(credit_limit-used,0),"provider":"Lusha simulado","scope":"250 por cartera; agregado visible"},"generated_at":now(),"mode":"synthetic","roadmap":[{"id":"mvp","name":"MVP operativo","title":"MVP operativo","status":"incluido","description":"Piloto con perfiles, aprobaciones y trazabilidad"},{"id":"regional","name":"Consolidación regional","title":"Consolidación regional","status":"incluido","description":"Configuración base de cinco países, validación local por Vertia"},{"id":"evolution","name":"Evolución especializada","title":"Evolución especializada","status":"ampliacion","description":"WhatsApp/LinkedIn y conectores adicionales" if application=="prospectador" else "ERP avanzado, portal externo, add-in Word y analítica predictiva"}]})
+    out["demo_as_of"]="2026-10-16"
+    out["profile_label"]="Perfil de demostración · no SSO"
+    if application=="prospectador":
+        from .commercial import extend_state
+        extend_state(s,user,out,application_records)
+    from .analytics import dashboard
+    out["dashboard"]=dashboard(out,application)
     return out
 
 class Action(BaseModel):
@@ -241,10 +261,14 @@ def health(s:Session=Depends(session)):
 
 @app.get("/api/state")
 def get_state(app:Literal["prospectador","contratos"],s:Session=Depends(session),user=Depends(viewer)):
-    return state(s,user,app)
+    # All fields are JSON primitives already. Avoid traversing the full regional
+    # catalogue again through FastAPI's generic model encoder.
+    return JSONResponse(state(s,user,app))
 
 def crm_action(s,user,a):
     p=a.payload; action=a.action; entity=None
+    from .commercial import COMMERCIAL_ACTIONS, action as commercial_action
+    if action in COMMERCIAL_ACTIONS: return commercial_action(s,user,a)
     if action in {"save_icp","profile_company","evaluate_company","enrich_company"}:
         from .profiling import profile_action
         return profile_action(s,user,a)
@@ -285,36 +309,6 @@ def crm_action(s,user,a):
             entity=crm_action(s,user,Action(app=a.app,action="create_contact",payload=row))
             imported+=1
         entity=new(s,a.app,"activities",title="Importación de contactos",type="import",country=user["country"],owner_id=user["id"],date=now(),status="completada",imported=imported,duplicates=skipped,description=f"{imported} contactos creados; {skipped} duplicados omitidos")
-    elif action=="search_prospects":
-        cc=country_field(user,p)
-        if user["role"]=="legal": fail("Perfil Legal sin prospección",403)
-        query=text_field(p,"query",limit=200)
-        selected_company=None
-        if p.get("company_id"):
-            selected_company=get(s,a.app,"companies",p["company_id"]); write(s,user,selected_company)
-            if selected_company.data["country"]!=cc: fail("La empresa y búsqueda deben compartir país")
-        for i in range(3):
-            token=uuid4().hex[:6]
-            entity=new(s,a.app,"prospects",name=f"Contacto demo {i+1} · {query}",email=f"candidato-{token}@prospectos-{cc.lower()}.example",title="Responsable de Marketing",company_id=selected_company.id if selected_company else None,company_name=selected_company.data["name"] if selected_company else f"{query} · Empresa ficticia {i+1}",country=cc,owner_id=selected_company.data["owner_id"] if selected_company else user["id"],sector=p.get("sector","Retail"),score=None,status="pendiente",revealed=False,source="Lusha simulado · contacto ficticio; no se consultó una fuente externa",credit_cost=1)
-    elif action=="reveal_contact":
-        entity=get(s,a.app,"prospects",a.entity_id or p.get("prospect_id")); write(s,user,entity)
-        if entity.data.get("revealed"): fail("El prospecto ya fue revelado; no se descuentan créditos adicionales",409)
-        # Lock owner-specific PostgreSQL key to avoid simultaneous overdraw.
-        s.execute(text("SELECT pg_advisory_xact_lock(hashtext(:key))"),{"key":"credits:"+entity.data["owner_id"]})
-        used=sum(r.data.get("revealed",False) for r in records(s,a.app,"prospects") if r.data.get("owner_id")==entity.data["owner_id"])
-        if used>=250: fail("Créditos de demostración agotados",409)
-        d=entity.data
-        existing=next((r for r in records(s,a.app,"contacts") if r.data.get("email")==d["email"]),None)
-        if existing:
-            read(s,user,existing)
-            save(s,entity,revealed=True,status="revelado",contact_id=existing.id)
-        else:
-            if d.get("company_id"):
-                co=get(s,a.app,"companies",d["company_id"]); write(s,user,co)
-            else:
-                co=new(s,a.app,"companies",name=d["company_name"],country=d["country"],owner_id=d["owner_id"],sector=d.get("sector","Otros"),domain=d["email"].split("@")[1],status="activo")
-            contact=new(s,a.app,"contacts",**{k:d[k] for k in ["name","email","title","country","owner_id","score"]},company_id=co.id,company_name=co.data["name"],status="nuevo",excluded=False,source="Lusha simulado · contacto ficticio")
-            save(s,entity,revealed=True,status="revelado",contact_id=contact.id)
     elif action=="create_campaign":
         ids=p.get("contact_ids",[])
         if not isinstance(ids,list) or not ids or len(ids)>200 or not all(isinstance(rid,str) for rid in ids): fail("Seleccione entre 1 y 200 contactos")
@@ -333,7 +327,7 @@ def crm_action(s,user,a):
             criteria=get(s,a.app,"icp_profiles",context["icp_id"]); read(s,user,criteria); snapshot=criteria.data
         qualification={"icp_id":snapshot["id"] if snapshot else None,"icp_version":snapshot.get("version") if snapshot else None,"criteria_snapshot":snapshot,"company_ids":co_ids,"selected_by":user["id"],"selected_at":now(),"user_note":note}
         entity=new(s,a.app,"campaigns",name=text_field(p,"name"),country=contacts[0].data["country"],owner_id=user["id"],contact_ids=[c.id for c in contacts],subject=text_field(p,"subject","Propuesta de visibilidad",limit=300),body=text_field(p,"body","Borrador pendiente de revisión humana",limit=20000),status="borrador",approved_by=None,sent_count=0,reply_count=0,qualification_note=note,qualification_context=qualification)
-    elif action in {"set_campaign_content","draft_campaign","approve_campaign","send_campaign"}:
+    elif action in {"set_campaign_content","draft_campaign","approve_campaign"}:
         entity=target("campaigns"); d=entity.data
         if d["status"]=="enviada": fail("La campaña ya fue enviada",409)
         if action=="set_campaign_content":
@@ -346,18 +340,6 @@ def crm_action(s,user,a):
                 c=get(s,a.app,"contacts",rid); read(s,user,c)
                 if c.data.get("excluded"): fail("Retire contactos excluidos antes de aprobar",409)
             save(s,entity,status="aprobada",approved_by=user["id"],approved_at=now(),approval_hash=fingerprint(d))
-        else:
-            if d["status"]!="aprobada" or not d.get("approved_by"): fail("El envío exige aprobación humana previa",409)
-            if d.get("approval_hash") and d["approval_hash"]!=fingerprint(d): fail("El contenido cambió: requiere una nueva aprobación",409)
-            sent=0; skipped=0
-            for rid in d["contact_ids"]:
-                c=get(s,a.app,"contacts",rid); read(s,user,c)
-                if c.data.get("excluded") or c.data.get("status") in {"respondió","no_contactar"}:
-                    skipped+=1; continue
-                if not c.data["email"].endswith(".example"): fail("Destinatario no sintético bloqueado",409)
-                new(s,a.app,"messages",contact_id=c.id,campaign_id=entity.id,country=d["country"],owner_id=c.data["owner_id"],subject=d["subject"],body=d["body"],direction="outbound",status="simulado",provider="Microsoft 365 simulado",followup_status="programado")
-                save(s,c,status="contactado",last_contact_at=now()); sent+=1
-            save(s,entity,status="enviada",sent_count=sent,skipped_count=skipped,sent_at=now(),simulated=True)
     elif action in {"receive_reply","exclude_contact","log_meeting"}:
         entity=target("contacts"); d=entity.data
         if action=="receive_reply":
@@ -375,31 +357,62 @@ def crm_action(s,user,a):
             new(s,a.app,"activities",type="meeting",title=p.get("title","Reunión comercial"),date=event_date,contact_id=entity.id,country=d["country"],owner_id=d["owner_id"],status="programada",provider="Calendario simulado")
             save(s,entity,status="reunión")
         if action in {"receive_reply","exclude_contact"}:
+            from .commercial import cancel_pending
+            cancel_pending(s,entity,"respuesta" if action=="receive_reply" else "exclusión")
             for m in records(s,a.app,"messages"):
                 if m.data.get("contact_id")==entity.id and m.data.get("direction")=="outbound":
                     save(s,m,followup_status="cancelado",cancellation_reason="respuesta" if action=="receive_reply" else "exclusión")
     elif action=="set_opportunity":
-        co=get(s,a.app,"companies",p.get("company_id")); write(s,user,co)
-        status=p.get("status","propuesta")
-        if status not in {"nuevo","calificada","propuesta","negociacion","ganado","perdido"}: fail("Estado de oportunidad inválido")
-        if p.get("contact_id"):
-            c=get(s,a.app,"contacts",p["contact_id"]); read(s,user,c)
+        from .seed_v3 import FX
+        previous=target("opportunities") if a.entity_id else None
+        merged={**(previous.data if previous else {}),**p}
+        co=get(s,a.app,"companies",merged.get("company_id")); write(s,user,co)
+        status=merged.get("status","propuesta")
+        probabilities={"nuevo":10,"calificada":25,"propuesta":60,"negociacion":80,"ganado":100,"perdido":0}
+        if status not in probabilities: fail("Estado de oportunidad inválido")
+        if merged.get("contact_id"):
+            c=get(s,a.app,"contacts",merged["contact_id"]); read(s,user,c)
             if c.data.get("company_id")!=co.id: fail("El contacto no pertenece a la empresa")
-        data=dict(name=text_field(p,"name"),company_id=co.id,contact_id=p.get("contact_id"),country=co.data["country"],owner_id=co.data["owner_id"],amount=amount_field(p),currency=p.get("currency","USD"),status=status)
-        if a.entity_id:
-            entity=target("opportunities"); save(s,entity,**data)
+        amount=amount_field(merged);currency=merged.get("currency","USD")
+        if currency not in {"USD",next(c["currency"] for c in COUNTRIES if c["code"]==co.data["country"])}: fail("Moneda inválida para la oportunidad")
+        amount_usd=amount if currency=="USD" else round(amount/FX[co.data["country"]],2)
+        history=(previous.data.get("history",[]) if previous else [])+[{"at":now(),"by":user["id"],"from":previous.data.get("status") if previous else None,"status":status,"note":str(p.get("note","Actualización del tablero"))[:500]}]
+        data=dict(name=text_field(merged,"name"),company_id=co.id,contact_id=merged.get("contact_id"),country=co.data["country"],owner_id=co.data["owner_id"],sector=co.data.get("sector"),amount=amount,amount_usd=amount_usd,currency=currency,status=status,probability=probabilities[status],history=history,expected_close=iso_date(merged.get("expected_close",(date.today()+timedelta(days=30)).isoformat())),fx_source="Equivalencia ilustrativa de demostración; no cotización de mercado")
+        if previous: entity=previous;save(s,entity,**data)
         else: entity=new(s,a.app,"opportunities",**data)
     elif action=="sync_post":
-        if user["role"] not in {"regional","manager"}: fail("La conciliación requiere jefatura",403)
+        if user["role"] not in {"regional","manager","superadmin"}: fail("La conciliación requiere jefatura",403)
         entity=new(s,a.app,"activities",type="sync",title="Conciliación POST simulada",country=user["country"],owner_id=user["id"],status="completada",date=now(),description="3 registros validados; 0 enviados. Adaptador de archivos/API sin conexión real.",processed=3,errors=0)
     else: fail("Acción comercial no soportada")
     return entity
 
 def contract_action(s,user,a):
     p=a.payload; action=a.action
+    if action=="save_clm_settings":
+        if user["role"] not in {"innovation_admin","regional"}: fail("Solo Innovación o Regional puede configurar tipos, plantillas y flujos",403)
+        accepted={"types","templates","approval_flows","name","rules","reminder_days","workflow","type","template"}
+        if set(p)-accepted or len(str(p))>20000: fail("Configuración CLM inválida")
+        if "types" in p and (not isinstance(p["types"],list) or not 1<=len(p["types"])<=30 or not all(isinstance(v,str) and 0<len(v)<=100 for v in p["types"])): fail("Catálogo de tipos inválido")
+        for key in ["templates","approval_flows"]:
+            if key in p and (not isinstance(p[key],list) or len(p[key])>30 or not all(isinstance(v,dict) and isinstance(v.get("name"),str) and 0<len(v["name"])<=200 for v in p[key])): fail(f"Configuración {key} inválida")
+        for flow in p.get("approval_flows",[]):
+            if not isinstance(flow.get("steps"),list) or not all(isinstance(v,str) and len(v)<=200 for v in flow["steps"]): fail("Pasos de aprobación inválidos")
+        if "reminder_days" in p and (not isinstance(p["reminder_days"],list) or len(p["reminder_days"])>10 or not all(isinstance(v,int) and 1<=v<=365 for v in p["reminder_days"])): fail("Anticipación de alertas inválida")
+        return new(s,a.app,"clm_settings",country=user["country"],owner_id=user["id"],settings=p,version=len(records(s,a.app,"clm_settings"))+1)
+    # Pedir acceso a un expediente de otro país no modifica el contrato: lo puede solicitar un perfil de consulta.
+    if action!="request_access" and not editable(user):
+        fail("Este perfil tiene lectura regional y configuración, sin edición ni aprobación contractual" if user["role"]=="innovation_admin" else "Este perfil es de consulta: no puede crear, editar ni aprobar contratos",403)
     if action=="create_contract":
         cc=country_field(user,p)
-        return new(s,a.app,"contracts",title=text_field(p,"title"),name=p["title"],reference=f"VRT-{cc}-{uuid4().hex[:6].upper()}",country=cc,owner_id=user["id"],company=text_field(p,"company",f"Vertia {cc} · Ficticia"),counterparty=p.get("counterparty","Contraparte ficticia"),amount=amount_field(p),currency=p.get("currency","USD"),type=p.get("type","Comercial"),confidential=bool(p.get("confidential",True)),status="borrador",start_date=date.today().isoformat(),end_date=iso_date(p.get("end_date",(date.today()+timedelta(days=365)).isoformat())),version=1,documents=[],history=[{"status":"borrador","at":now(),"by":user["id"]}],analysis=None,redacted_ready=False,amendments=[])
+        configurations=sorted(records(s,a.app,"clm_settings"),key=lambda r:r.data.get("version",0))
+        config=configurations[-1].data if configurations else {}
+        settings=config.get("settings",{})
+        chosen_type=p.get("type","Comercial")
+        if settings.get("types") and chosen_type not in settings["types"]: fail("Seleccione un tipo contractual configurado")
+        templates=settings.get("templates",[])
+        template=next((t for t in templates if isinstance(t,dict) and t.get("type")==chosen_type),None)
+        flows=settings.get("approval_flows",[])
+        return new(s,a.app,"contracts",configuration_version=config.get("version"),template=template,approval_flow=flows[0] if flows else None,reminder_days=settings.get("reminder_days",[90,60,30]),title=text_field(p,"title"),name=p["title"],reference=f"VRT-{cc}-{uuid4().hex[:6].upper()}",country=cc,owner_id=user["id"],company=text_field(p,"company",f"Vertia {cc}"),counterparty=p.get("counterparty","Contraparte de demostración"),amount=amount_field(p),currency=p.get("currency","USD"),type=p.get("type","Comercial"),confidential=bool(p.get("confidential",True)),status="borrador",start_date=date.today().isoformat(),end_date=iso_date(p.get("end_date",(date.today()+timedelta(days=365)).isoformat())),version=1,documents=[],history=[{"status":"borrador","at":now(),"by":user["id"]}],analysis=None,redacted_ready=False,amendments=[])
     if action=="grant_access":
         entity=get(s,a.app,"access_requests",a.entity_id)
         c=get(s,a.app,"contracts",entity.data["contract_id"])
@@ -451,7 +464,7 @@ def contract_action(s,user,a):
             save(s,entity,analysis=local_analysis(u,entity))
             return entity
         if not d.get("documents"): fail("Primero adjunte un documento sintético",409)
-        save(s,entity,analysis={"provider":"Claude + OCR simulados","simulated":True,"summary":f"{d['type']} entre {d['company']} y {d.get('counterparty','Contraparte ficticia')}. Revisión humana requerida.","risk":"medio","risk_level":"medio","score":67,"extracted_fields":{"amount":d["amount"],"currency":d["currency"],"end_date":d["end_date"],"country":d["country"]},"findings":[{"title":"Renovación y aviso previo","severity":"media","evidence":"Cláusula sintética 4: aviso con 60 días de anticipación.","page":2,"recommendation":"Confirmar plazo con responsable local"},{"title":"Confidencialidad","severity":"alta","evidence":"Cláusula sintética 7: anexo con información reservada.","page":3,"recommendation":"Usar copia saneada para compartir entre países"}],"analyzed_at":now(),"source_version":d["version"],"requires_human_review":True})
+        save(s,entity,analysis={"provider":"Claude + OCR simulados","simulated":True,"summary":f"{d['type']} entre {d['company']} y {d.get('counterparty','Contraparte de demostración')}. Revisión humana requerida.","risk":"medio","risk_level":"medio","score":67,"extracted_fields":{"amount":d["amount"],"currency":d["currency"],"end_date":d["end_date"],"country":d["country"]},"findings":[{"title":"Renovación y aviso previo","severity":"media","evidence":"Cláusula sintética 4: aviso con 60 días de anticipación.","page":2,"recommendation":"Confirmar plazo con responsable local"},{"title":"Confidencialidad","severity":"alta","evidence":"Cláusula sintética 7: anexo con información reservada.","page":3,"recommendation":"Usar copia saneada para compartir entre países"}],"analyzed_at":now(),"source_version":d["version"],"requires_human_review":True})
     elif action=="redact_document":
         write(s,user,entity,{"regional","manager","legal"})
         if not d.get("documents"): fail("Primero adjunte un documento",409)
@@ -479,18 +492,25 @@ def contract_action(s,user,a):
 @app.post("/api/actions")
 def actions(a:Action,s:Session=Depends(session),user=Depends(viewer)):
     try:
+        if not supports(user,a.app): fail("Perfil no habilitado para esta aplicación",403)
+        if a.app=="prospectador" and not editable(user) and a.action not in {"save_ai_settings","save_icp"}: fail("Este perfil no puede modificar la operación comercial",403)
         entity=crm_action(s,user,a) if a.app=="prospectador" else contract_action(s,user,a)
         audit(s,a.app,user,a.action,entity)
         s.commit()
-        return {"ok":True,"message":"Operación registrada en la demostración.","entity":entity.data if entity else None}
+        result=dict(entity.data) if entity else None
+        if entity and entity.kind=="prospects" and not result.get("revealed"):
+            email=result.get("email","");phone=result.get("phone","")
+            result.update(email=None,phone=None,email_masked=email[:1]+"••••@"+email.split("@")[-1] if email else "No disponible",phone_masked=phone[:3]+" ••• ••• "+phone[-2:] if phone else "No disponible")
+        return {"ok":True,"message":"Operación registrada en la demostración.","entity":result}
     except Exception:
         s.rollback()
         raise
 
 @app.get("/api/export")
 def export(app:Literal["prospectador","contratos"],s:Session=Depends(session),user=Depends(viewer)):
+    if not supports(user,app): fail("Perfil no habilitado para esta aplicación",403)
     kind="contacts" if app=="prospectador" else "contracts"
-    rows=[r.data for r in records(s,app,kind) if allowed(s,user,r) and (app!="contratos" or user["role"]=="regional" or r.data["country"]==user["country"])]
+    rows=[r.data for r in records(s,app,kind) if allowed(s,user,r) and (app!="contratos" or all_countries(user) or r.data["country"]==user["country"])]
     fields=["id","name","email","company_name","country","status","owner_id"] if kind=="contacts" else ["id","reference","title","company","country","type","status","amount","currency","end_date"]
     buf=io.StringIO(); buf.write("\ufeff"); writer=csv.DictWriter(buf,fieldnames=fields,extrasaction="ignore"); writer.writeheader()
     # Spreadsheet formula injection is neutralized even for user-created fields.
@@ -516,7 +536,7 @@ def document(cid:str,redacted:bool=True,s:Session=Depends(session),user=Depends(
             if not u or not original_path(u).is_file(): fail("Original no disponible",404)
             audit(s,"contratos",user,"download_real_original",r); s.commit()
             return FileResponse(original_path(u),media_type=u.content_type,filename=u.filename,content_disposition_type="attachment",headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff","Content-Security-Policy":"sandbox; default-src 'none'"})
-        parts=["ORIGINAL SINTÉTICO · DEMOSTRACIÓN",d["title"],f"Referencia: {d['reference']}",f"Partes: {d['company']} y {d.get('counterparty','Contraparte ficticia')}",f"Monto confidencial: {d['amount']} {d['currency']}","Cuenta bancaria: DEMO-IBAN-99887766", "Identificador fiscal: DEMO-TAX-11223344","Condición comercial reservada: descuento privado del 17%",f"Vencimiento: {d['end_date']}","Cláusula 4: aviso previo con 60 días de anticipación.","Cláusula 7: confidencialidad de anexos y precios.","No corresponde a un documento real ni a una firma legal."]
+        parts=["ORIGINAL SINTÉTICO · DEMOSTRACIÓN",d["title"],f"Referencia: {d['reference']}",f"Partes: {d['company']} y {d.get('counterparty','Contraparte de demostración')}",f"Monto confidencial: {d['amount']} {d['currency']}","Cuenta bancaria: DEMO-IBAN-99887766", "Identificador fiscal: DEMO-TAX-11223344","Condición comercial reservada: descuento privado del 17%",f"Vencimiento: {d['end_date']}","Cláusula 4: aviso previo con 60 días de anticipación.","Cláusula 7: confidencialidad de anexos y precios.","No corresponde a un documento real ni a una firma legal."]
     title="Extracto aprobado" if d.get("has_real_uploads") else "Documento sintético"
     rendered='<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+title+'</title><body><main>'+''.join(f"<p>{html.escape(str(p))}</p>" for p in parts)+"</main></body></html>"
     audit(s,"contratos",user,"download_redacted" if redacted else "download_original",r)

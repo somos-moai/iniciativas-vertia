@@ -3,13 +3,13 @@
 @AGENTS.md
 @docs/BRIEF.md
 @docs/tasks/CLAUDE_PROPOSALS.md
-@HANDOFF_CLAUDE.md
+@HANDOFF_V4.md
 
-## Encargo vigente de continuación
+## Encargo vigente: rediseño v4 para vender
 
-El usuario solicitó que Claude Code continúe la coordinación con Gemini en Antigravity. Leer primero HANDOFF_CLAUDE.md y, si existe, docs/coordination/HANDOFF_BUG_DOCUMENTOS.md. La prioridad es el defecto confirmado de campos propuestos vacíos al cambiar entre versiones PDF/PNG, luego la revisión conjunta de la nueva experiencia. No afirmar que ese defecto esté resuelto por los 38 checks anteriores.
+Leer primero HANDOFF_V4.md. El usuario juzga la v3 funcional pero plana, recargada de texto y difícil de vender; la prioridad es una dirección de producto y visual nueva, validada con el usuario antes de construir. El defecto de versiones documentales de HANDOFF_CLAUDE.md quedó resuelto y publicado (c87b74c).
 
-Para este encargo Claude puede trabajar en frontend, backend, pruebas y coordinación según sea necesario, conservar el despliegue privado y coordinar commits y publicación verificados. Esta instrucción vigente reemplaza las restricciones de autoría de la tarea comercial histórica que figuran abajo. No cambiar precios, dominio, servicios ajenos ni documentos del usuario; no exponer credenciales ni atribuir trabajo a Gemini sin su evidencia.
+Claude puede trabajar en frontend, backend, pruebas y coordinación, y coordinar commits y publicación verificados con aprobación del usuario. Esta instrucción reemplaza las restricciones de autoría de la tarea comercial histórica que figuran abajo. No cambiar precios, dominio, servicios ajenos ni documentos del usuario; no exponer credenciales ni atribuir trabajo a Gemini o GPT sin su evidencia. GPT no debe generar subagentes.
 
 ## Alcance
 - Escribes solo en docs/commercial/ y docs/coordination/claude.md.

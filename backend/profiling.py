@@ -63,16 +63,19 @@ def profile_action(s,user,a):
             except (TypeError,ValueError): api.fail(f"Criterio {key} inválido")
             if not 0<=number<=1e12: api.fail(f"Criterio {key} fuera de rango")
             criteria[key]=number
-    reasons=[]; missing=[]; matches=0; evaluated=0; configured=0; excluded=False
+    reasons=[]; missing=[]; criterion_details=[]; matches=0; evaluated=0; configured=0; excluded=False
     sources=[{"field":"sector","source":"fixture sintético" if data.get("id","").startswith("company-") and len(data["id"])<20 else "ingreso manual","value":data.get("sector"),"evidence":f"Campo sector: {data.get('sector','sin dato')}"},{"field":"country","source":"registro de cartera","value":data["country"],"evidence":f"País declarado: {data['country']}"}]
     def evaluate(label,value,valid,required=True):
         nonlocal matches,evaluated,configured
         configured+=1
         if value is None or value=="" or value==[]:
             missing.append(label); reasons.append(f"{label}: falta evidencia; no se puntúa")
+            criterion_details.append({"label":label,"available":False,"matched":False,"value":value})
             return
         evaluated+=1
-        if valid(value): matches+=1; reasons.append(f"{label}: coincide con el criterio declarado")
+        matched=bool(valid(value))
+        criterion_details.append({"label":label,"available":True,"matched":matched,"value":value})
+        if matched: matches+=1; reasons.append(f"{label}: coincide con el criterio declarado")
         else: reasons.append(f"{label}: no coincide con el criterio declarado")
     sectors=criteria.get("target_sectors",[])
     if sectors: evaluate("Sector",profile.get("industry") or data.get("sector"),lambda value:value.lower() in {v.lower() for v in sectors})
@@ -85,6 +88,7 @@ def profile_action(s,user,a):
     if budget is not None:
         if profile.get("budget_currency")!="USD":
             configured+=1; missing.append("Presupuesto anual confirmado en USD"); reasons.append("Presupuesto: no se convierte ni infiere una moneda desconocida")
+            criterion_details.append({"label":"Presupuesto anual USD","available":False,"matched":False,"value":profile.get("annual_budget")})
         else: evaluate("Presupuesto anual USD",profile.get("annual_budget"),lambda value:value>=budget)
     desired=criteria.get("signals",[])
     if desired: evaluate("Señales comerciales",profile.get("signals"),lambda value:bool({v.lower() for v in value}&{v.lower() for v in desired}))
@@ -102,6 +106,7 @@ def profile_action(s,user,a):
     score=round(matches/evaluated*100) if evaluated else None
     decision="excluida" if excluded else "sin_criterios" if not configured else "informacion_insuficiente" if missing else "priorizar" if score is not None and score>=75 else "revisar" if score is not None and score>=50 else "baja_afinidad"
     fit={"score":score,"score_type":"porcentaje de criterios comprobables coincidentes; no probabilidad de venta","decision":decision,"reasons":reasons or ["Defina criterios ICP para evaluar esta empresa"],"missing_fields":missing,"criteria_version":criteria.get("version"),"criteria_id":criteria.get("id"),"criteria_evaluated":evaluated,"criteria_configured":configured,"coverage":round(evaluated/max(configured,1)*100),"sources":sources,"evaluated_at":api.now(),"method":"reglas locales transparentes","ai_connected":False,"external_enrichment":False}
+    fit["criteria"]=criterion_details
     profile.update({"updated_by":user["id"],"updated_at":api.now(),"source":"datos declarados; sin enriquecimiento externo"})
     if a.action=="enrich_company": fit["notice"]="Sin API externa conectada: se evaluaron únicamente datos existentes. Complete los campos faltantes."
     api.save(s,company,profile=profile,fit=fit)
