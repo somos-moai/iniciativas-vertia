@@ -94,7 +94,7 @@ Criterio de cierre: guion de demo de 3 minutos por app (`docs/design/DEMO_SCRIPT
 
 ## 6. Estado técnico al cierre de esta ventana
 
-Git (`main`): publicado `c87b74c` (+ registro `b884845`). **Sin commit**: todo el trabajo v3 de Codex más las correcciones de Claude (unos 57 archivos). Recomendación: commitearlo en una rama (`experiencia-v3`) antes del rediseño, para no perder la lógica. Pedir confirmación al usuario.
+Git: `main` sigue en `b884845` y es lo publicado en el VPS (versión `c87b74c`). Todo el trabajo v3 (Codex más las correcciones de Claude) está en la rama **`experiencia-v3`** (commit `f4262fc`), subida a GitHub y **no publicada**. Partir el rediseño v4 desde esa rama, en una rama nueva, por ejemplo `rediseno-v4`.
 
 Correcciones de Claude sobre la v3 (sin commit):
 - Contraste AA en ambos temas: `scripts/gen_dark_overrides.py` → `frontend/src/dark-overrides.css`; correcciones en `theme.css`.
